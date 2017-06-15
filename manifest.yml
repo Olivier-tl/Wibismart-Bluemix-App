@@ -22,3 +22,4 @@ applications:
   command: node app.js
   services:
   - Internet of Things Platform-as
+  - Cloudant NoSQL DB-c3

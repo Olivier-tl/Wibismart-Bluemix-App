@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Josefin+Sans">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Josefin+Sans">
     <link href = "css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet/less" type="text/css" href="less/dropdown.less" />
@@ -109,7 +109,7 @@
       <ul class="sidebar-menu">
         <li class="header">NAVIGATION</li>
         <!-- Optionally, you can add icons to the links -->
-        <li id = "home" class="side-label"><a href='{% url "loggedin" %}'><i class="fa fa-home"></i> <span>Home</span></a></li>
+        <li id = "home" class="side-label"><a href='home.html'><i class="fa fa-home"></i> <span>Home</span></a></li>
 
         <li id = "dashboards" class="treeview side-label">
           <a href="#">
@@ -131,9 +131,10 @@
               </a>
 
               <ul class="treeview-menu">
-                <li id="live-{{device.id}}"><a href="/accounts/loggedin/{{device.id}}/"><i id="fafa-live-{{device.id}}" class="fa fa-circle-o"></i> Live Dashboard</a></li>
+                <li id="live-{{device.id}}"><a href="index.html"><i id="fafa-live-{{device.id}}" class="fa fa-circle-o"></i> Live Dashboard</a></li>
                 <li id="historical-{{device.id}}">
-                  <a href="/accounts/loggedin/{{device.id}}/historicalDashboard/"><i id="fafa-historical-{{device.id}}" class="fa fa-circle-o"></i> Historical Dashboard </a>
+                  <a href="historicalDashboard.html"><i id="fafa-historical-{{device.id}}" class="fa fa-circle-o"></i> Historical Dashboard </a>
+                  <!--ref = "/accounts/loggedin/{{device.id}}/historicalDashboard/" -->
                 </li>
               </ul>
 
@@ -142,7 +143,7 @@
           </ul>
         </li>
 
-      <li id = "devicemanager" class = "side-label"><a href='{% url "devicemanager" %}'><i class="fa fa-th"></i> <span>Device Manager</span></a></li>
+      <li id = "devicemanager" class = "side-label"><a href='device_manager.html'><i class="fa fa-th"></i> <span>Device Manager</span></a></li>
       <li id = "profile" class = "side-label"><a href='{% url "profile" %}'><i class="fa fa-user"></i> <span>Profile</span></a></li>
 
       </ul>
@@ -181,12 +182,6 @@
               <div id="rssi-indicator" class="count"></div>
               <span class="count_bottom"><i class="fa fa-sort-asc"></i><i id = "rssi"></i> dBm RSSI</span>
             </div>
-            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
-              <span class="count_top"><i class="fa fa-sun-o" aria-hidden="true"></i> Lighting</span>
-              <div  class="count"><span id="light_indicator_bottom" class="count"></span>     <span class="count"><i id = "light-circle" class="fa fa-circle" aria-hidden="true"></i></span></div>
-              
-              <span class="count_bottom"><i class="fa fa-sort-asc"></i><span id= "live_light"></span></span>
-            </div> 
             <!--<div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
 
               <span class="count_top"><i class="fa fa-pencil" aria-hidden="true"></i> Weekly Entries</span>
@@ -196,13 +191,13 @@
             </div>-->
             <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top"><i class="fa fa-tablet" aria-hidden="true"></i> Autonomy </span>
-              <div class="count live-tile-count" id= "live_autonomy">{{ autonomy }} hours</div>
+              <div class="count" id= "live_autonomy"></div>
               <span class="count_bottom"><i class="fa fa-sort-asc"></i>time until device is off </i> </span>
             </div>
             <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top"><i class="fa fa-battery-half" aria-hidden="true"></i> Battery Level</span>
               <div class="count" id = "batteryvalue"></div>
-              <span class="count_bottom"><i class="fa fa-sort-asc"></i><span id= "light_indicator"></span> Light Exposure</span>
+              <span class="count_bottom"><i class="fa fa-sort-asc"></i><span id= "light_indicator"></span> Light Exposure </span>
               
             </div>
           </div>
@@ -543,6 +538,7 @@
     <script src = "js/gauge.min.js"></script>
     <script src="js/dygraph-combined.js"></script>
     <script src = "js/dygraph-combined-dev.js"></script>
+    <script src="../js/node_modules\dygraphs\src\dygraph.js"></script>
     <script src = "js/bootstrap-toggle.min.js"></script>
     <script src = "js/jquery.matchHeight-min.js"></script>
     <script src = "js/leftside_device_list.js"></script>

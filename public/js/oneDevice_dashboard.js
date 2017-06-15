@@ -6,12 +6,21 @@ var multiplexer = new WebSocketMultiplex(sockjs);
 
 var air  = multiplexer.channel('air');
 var accel  = multiplexer.channel('accel');
+var light = multiplexer.channel('health');
+var battery = multiplexer.channel('battery');
+var locationChannel = multiplexer.channel('location');
+
+
 
 function connectOnClick() {
+	console.log("click");
 	var uuid = document.getElementById('uuid').value;
 	var data = JSON.stringify({"deviceId": uuid});
 	air.send(data);
 	accel.send(data);
+	light.send(data);
+	battery.send(data);
+	locationChannel.send(data);
 	//$('#uuid').hide();
 	//$('#uuidConfirm').hide();
 }
@@ -39,6 +48,25 @@ accel.onmessage = function(e) {
 	accelObj.z = parseFloat(data.d.z);
 	sensorData.setReading("accelerometer", accelObj);
 }
+
+light.onmessage = function (e) {
+	var data = jQuery.parseJSON(e.data);
+	$("#light_indicator").html(data.d.light + "mV");
+}
+
+battery.onmessage = function(e) {
+	var data = jQuery.parseJSON(e.data);
+	$("#batteryvalue").html(data.d.batteryLevel + "%");
+	$("#live_autonomy").html(data.d.batteryLife + "hours");
+}
+
+locationChannel.onmessage = function(e) {
+	console.log("rssimessage.");
+	var data = jQuery.parseJSON(e.data);
+	$("#rssi").html(data.d.rssi + " dbm");
+}
+
+
 function SensorData() {
 	this.accelerometer = [];
 	this.pressure =  0;
