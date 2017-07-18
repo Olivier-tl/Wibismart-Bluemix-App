@@ -16,7 +16,7 @@
 ---
 applications:
 - name: enviro-dashboard
-  memory: 128M
+  memory: 8G
   host: enviro-dashboard
   domain: mybluemix.net
   command: node app.js

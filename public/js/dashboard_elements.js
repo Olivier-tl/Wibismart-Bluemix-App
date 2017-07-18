@@ -105,7 +105,39 @@ var TemperatureGauge = (function () {
     };
 })();
 
+var CO2Gauge = (function () {
+    var instance;
 
+    function createInstance() {
+        var opts = {
+          lines: 12, // The number of lines to draw
+          angle: 0.3, // The length of each line
+          lineWidth: 0.1, // The line thickness
+
+          limitMax: 'false',   // If true, the pointer will not go past the end of the gauge
+          colorStart: '#5bb0de',   // Colors
+          colorStop: '#5bc0ae',    // just experiment with them
+          strokeColor: '#FFFFFF',   // to see which ones work best for you
+          generateGradient: true
+        };
+        var target = document.getElementById('CO2gauge'); // your canvas element
+        var gauge = new Donut(target).setOptions(opts); // create sexy gauge!
+        gauge.maxValue = 2000; // set max gauge value
+        gauge.maxValue = 300; // set max gauge value
+        gauge.animationSpeed = 1; // set animation speed (32 is default value)
+        gauge.set(5); // set actual value
+        return gauge;
+        }
+
+    return {
+        getInstance: function () {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+})();
 
 
 function renderTemperatureGaugeColor(temperature){

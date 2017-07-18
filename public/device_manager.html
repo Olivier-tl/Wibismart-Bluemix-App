@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <link href = "css/device_manager/device_manager.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Josefin+Sans">
+    <link href = "css/bootstrap.min.css" rel="stylesheet">
+    <link href = "css/rangeslider/ion.rangeSlider.css" rel="stylesheet">
+     <link href = "css/rangeslider/ion.rangeSlider.skinFlat.css" rel="stylesheet">
+     <link href = "css/checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
+     <link href = "css/device_manager/device_settings.css" rel="stylesheet">
+
+    <link rel="stylesheet/less" type="text/css" href="less/dropdown.less" />
+    <title>WibiSmart</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link href = "css/AdminLTE.min.css" rel="stylesheet">
+
+    <link href = "css/skins/skin-blue.min.css" rel="stylesheet">
+    <link href = "css/top-tiles.css" rel="stylesheet">
+    <link href = "css/layout/layout_platform.css" rel="stylesheet">
+
+    <link href = "css/oneDevice_dashboard.css" rel="stylesheet">
+
+</head>
+<body >
+
+  <body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <!-- Main Header -->
+  <header class="main-header">
+
+    <!-- Logo -->
+    <a href="#" class="logo">
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><b>W</b>S</span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg"><b>Wibi</b>Smart</span>
+    </a>
+
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-fixed-top" role="navigation">
+      <!-- Sidebar toggle button-->
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      <!-- Navbar Right Menu -->
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+        
+
+          <!-- User Account Menu -->
+          <li class="dropdown user user-menu">
+            <!-- Menu Toggle Button -->
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <!-- The user image in the navbar-->
+              <img src="img/user.png" class="user-image" alt="User Image">
+              <!-- hidden-xs hides the username on small devices so only the image appears. -->
+              <span class="hidden-xs">{{full_name}}</span>
+            </a>
+            <ul class="dropdown-menu">
+              <!-- The user image in the menu -->
+              <li class="user-header">
+                <img src="img/user.png" class="img-circle" alt="User Image">
+
+                <p>
+                  Mina Danesh - Electrical Engineer
+                  <small>Member since Nov. 2012</small>
+                </p>
+              </li>
+
+              <!-- Menu Footer-->
+              <li class="user-footer">
+                <div class="pull-left">
+                  <a href='{% url "profile" %}' class="btn btn-default btn-flat">Profile</a>
+                </div>
+                <div class="pull-right">
+                  <a href='{% url "logout" %}' class="btn btn-default btn-flat">Sign out</a>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel">
+        <div class="pull-left image">
+          <img src="img/user.png" class="img-circle" alt="User Image">
+        </div>
+        <div class="pull-left info">
+          <!--<p>{{full_name}}</p>-->
+          <!-- Status -->
+          <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <ul class="sidebar-menu">
+        <li class="header">NAVIGATION</li>
+        <!-- Optionally, you can add icons to the links -->
+        <li id = "home" class="side-label"><a href='home.html'><i class="fa fa-home"></i> <span>Home</span></a></li>
+
+        <li id = "livedashboards" class = "side-label"><a href='index.html'><i class="fa fa-dashboard"></i> <span>Live Dashboard</span></a></li> 
+        <li id = "historicaldashboards" class = "side-label"><a href='historicalDashboard.html'><i class="fa fa-area-chart"></i> <span>Historical Dashboard</span></a></li> 
+
+      <li id = "devicemanager" class = "side-label"><a href='device_manager.html'><i class="fa fa-th"></i> <span>Device Manager</span></a></li>
+      <li id = "profile" class = "side-label"><a href='{% url "profile" %}'><i class="fa fa-user"></i> <span>Profile</span></a></li>
+
+      </ul>
+      <!-- /.sidebar-menu -->
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+   
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Device Manager
+        <small>Add, edit, or delete devices!</small>
+      </h1>
+
+
+
+
+    </section>
+
+
+ <section class="content">
+        <div id = "messages-container" height = "100px">
+          <ul class="list-group" id =  "messages">
+          </ul>
+        </div>
+        
+            <div style="padding-bottom: 20px; padding-top:10px;">
+                <!-- UUID INPUT -->
+                <div class="input-group">
+                    <input id="uuid" type="text" class="form-control" placeholder="Gateway ID">
+        </div>
+      </div>
+
+
+       <div class = "row">
+            <div class="col-md-8">
+                <div class="box box-success box-solid collapsed-box">
+                    <div class="box-header with-border" id = "scanbox" data-widget="collapse">
+                        <i id = "scanfafa" class="fa fa-wifi shake"></i>
+                        <h3 class="box-title">Start a Scan</h3>
+                          <!-- /.box-tools -->
+                    </div>
+                <!-- /.box-header -->
+                <div  id = "devicesfound">
+                    <ul class="list-group" id =  "listdevicesfound">
+
+                    </ul>
+
+
+                </div>
+                <div id = "loading">
+
+                </div>
+                <!-- /.box-body -->
+              </div>
+              <!-- /.box -->
+        </div>
+
+      <div class="container-fluid">
+      <div class = "row" style="padding-bottom: 20px">
+        <div class="col-md-10">
+          <button id="connectdevice" class="btn btn-default" type="button" onclick="connectOnClick()">Connect</button>
+        </div>
+      </div>
+      </div>
+       </div>
+
+
+
+          <div class = "row">
+            <div class="col-md-8">
+                <div class="box box-success box-solid collapsed-box">
+                    <div class="box-header with-border" id = "getterbox" data-widget="collapse">
+                        <i id = "scanfafa" class="fa fa-link" aria-hidden="true"></i>
+                        <h3 class="box-title">Get Connected Devices</h3>
+                          <!-- /.box-tools -->
+                    </div>
+                <!-- /.box-header -->
+                <div  id = "connecteddevices">
+                    <ul class="list-group" id =  "listconnecteddevices">
+
+                    </ul>
+
+
+                </div>
+                <div id = "loading">
+
+                </div>
+                <!-- /.box-body -->
+              </div>
+              <!-- /.box -->
+          </div>
+         </div>
+
+
+    <div style="padding-bottom:20px">
+      <div class = "row">
+        <div class="col-md-10">
+          <button id="deviceSettings" class="btn btn-default" type="button" onclick="getSettings()">Device Settings</button>
+          <button id="disconnectdDevice" class="btn btn-default" type="button" onclick="disconnectOnClick()">Disconnect</button>
+        </div>
+      </div>
+    </div>
+
+
+    </section>
+    
+    <!-- Main content -->
+    <section class="content">
+        <h4 id = "devicename"> </h4>
+
+        <div class = "row" id="accelsettings">
+          <div class="col-md-10">
+              <div class="box box-info device-box">
+                <div class="box-header with-border">
+                  <h3 class="box-title"><i class="fa fa-line-chart" aria-hidden="true"></i> Accelerometer Settings </h3>
+                </div>
+                <div class="box-body">
+                    <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-accelerometer" name = "checkbox-accelerometer">
+                        <label for="checkbox-accelerometer">
+                            On/Off
+                        </label>
+                    </div>
+
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <p> Period (in seconds) : </p>
+                        </div>
+                    </div>
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <div class="range-slider">
+                                <input type="text" name = "accelerometer-rangeslider" id = "accelerometer-range-slider" class="js-range-slider" value="" />
+                            </div>
+                        </div>
+                    </div>
+                    <button name = "formdata" value ="accelerometer" id="accelsubmit" onclick = "accelSubmitClick()" class = "btn btn-default pull-right"> Submit </button>
+                </div>
+
+              </div>
+          </div>
+        </div>
+
+
+
+        <div class = "row" id ="weathersettings">
+          <div class="col-md-10">
+              <div class="box box-primary device-box">
+                <div class="box-header with-border">
+                  <h3 class="box-title"><i class="fa fa-sun-o" aria-hidden="true"></i> Weather Settings </h3>
+                </div>
+                <div class="box-body">
+                    <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-weather" name = "checkbox-weather">
+                        <label for="checkbox-weather">
+                            On/Off
+                        </label>
+                    </div>
+
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <p> Period (in seconds) : </p>
+                        </div>
+                    </div>
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <div class="range-slider slider-section">
+                                <input name = "weather-rangeslider" id = "weather-range-slider" type="text" class="js-range-slider" value="" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button name = "formdata" value ="weather" id = "weathersubmit" onclick = "weatherSubmitClick()" class = "btn btn-default pull-right"> Submit </button>
+                </div>
+              </div>
+          </div>
+        </div>
+
+        
+        
+        <div class = "row" id ="CO2settings">
+          <div class="col-md-10">
+              <div class="box box-primary device-box">
+                <div class="box-header with-border">
+                  <h3 class="box-title"><i class="fa fa-cloud" aria-hidden="true"></i> CO2 Settings </h3>
+                </div>
+                <div class="box-body">
+                    <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-CO2" name = "checkbox-CO2">
+                        <label for="checkbox-CO2">
+                            On/Off
+                        </label>
+                    </div>
+
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <p> Period (in seconds) : </p>
+                        </div>
+                    </div>
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <div class="range-slider slider-section">
+                                <input name = "CO2-rangeslider" id = "CO2-range-slider" type="text" class="js-range-slider" value="" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button name = "formdata" value ="CO2" id = "CO2submit" onclick = "CO2SubmitClick()" class = "btn btn-default pull-right"> Submit </button>
+                </div>
+              </div>
+          </div>
+        </div>
+
+        <div class = "row" id="lightsettings">
+          <div class="col-md-10">
+              <div class="box box-primary device-box">
+                <div class="box-header with-border">
+                  <h3 class="box-title"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> Light Settings </h3>
+                </div>
+                <div class="box-body">
+                    <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-light" name="checkbox-light" >
+                        <label for="checkbox-light">
+                            On/Off
+                        </label>
+                    </div>
+
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <p> Period (in seconds) : </p>
+                        </div>
+                    </div>
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <div class="range-slider slider-section">
+                                <input name = "light-rangeslider" id = "light-range-slider" type="text" class="js-range-slider" value="" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button name = "formdata" value ="light" id="lightsubmit" onclick = "lightSubmitClick()" class = "btn btn-default pull-right"> Submit </button>
+                </div>
+              </div>
+          </div>
+        </div>
+
+    </section>
+    <!-- /.content -->
+
+
+
+          </div>
+          <!-- /.box -->
+        </div>
+      </div>
+
+
+
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <!-- Main Footer -->
+  <footer class="main-footer" style="position:relative">
+    <!-- To the right -->
+    <div class="pull-right hidden-xs">
+      Deploy, Everywhere!
+    </div>
+    <!-- Default to the left -->
+    <strong>Copyright &copy; 2017 <a href="#">Wibicom Inc</a>.</strong> All rights reserved.
+  </footer>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Create the tabs -->
+    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+      <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <!-- Home tab content -->
+      <div class="tab-pane active" id="control-sidebar-home-tab">
+        <h3 class="control-sidebar-heading">Recent Activity</h3>
+        <ul class="control-sidebar-menu">
+          <li>
+            <a href="javascript::;">
+              <i class="menu-icon fa fa-birthday-cake bg-red"></i>
+
+              <div class="menu-info">
+                <h4 class="control-sidebar-subheading">Langdon's Birthday</h4>
+
+                <p>Will be 23 on April 24th</p>
+              </div>
+            </a>
+          </li>
+        </ul>
+        <!-- /.control-sidebar-menu -->
+
+        <h3 class="control-sidebar-heading">Tasks Progress</h3>
+        <ul class="control-sidebar-menu">
+          <li>
+            <a href="javascript::;">
+              <h4 class="control-sidebar-subheading">
+                Custom Template Design
+                <span class="pull-right-container">
+                  <span class="label label-danger pull-right">70%</span>
+                </span>
+              </h4>
+
+              <div class="progress progress-xxs">
+                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
+              </div>
+            </a>
+          </li>
+        </ul>
+        <!-- /.control-sidebar-menu -->
+
+      </div>
+      <!-- /.tab-pane -->
+      <!-- Stats tab content -->
+      <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
+      <!-- /.tab-pane -->
+      <!-- Settings tab content -->
+      <div class="tab-pane" id="control-sidebar-settings-tab">
+        <form method="post">
+          <h3 class="control-sidebar-heading">General Settings</h3>
+
+          <div class="form-group">
+            <label class="control-sidebar-subheading">
+              Report panel usage
+              <input type="checkbox" class="pull-right" checked>
+            </label>
+
+            <p>
+              Some information about this general settings option
+            </p>
+          </div>
+          <!-- /.form-group -->
+        </form>
+      </div>
+      <!-- /.tab-pane -->
+    </div>
+  </aside>
+  <!-- /.control-sidebar -->
+  <!-- Add the sidebar's background. This div must be placed
+       immediately after the control sidebar -->
+  <div class="control-sidebar-bg"></div>
+</div>
+
+
+
+
+
+
+
+
+
+    <!--placed at the end of document for faster response -->
+
+     <!-- to load image : <img src="{% static 'img/iphone.png' %} class= 'img-responsive' /> allows it to be browser resp -->
+
+    <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src = "js/bootstrap.min.js"></script>
+    <script src = "js/app.min.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="https://d3js.org/d3.v2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/three.js/r67/three.js"></script>
+    <script type="text/javascript" src="js/OrbitControls.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+    <script type="text/javascript" src="https://d1fxtkz8shb9d2.cloudfront.net/websocket-multiplex-0.1.js"></script>
+    <script type="text/javascript" src="js/stats.js"></script>
+    <script src="js/Chart.bundle.min.js"></script>
+    <script src = "js/gauge.min.js"></script>
+    <script src="js/dygraph-combined.js"></script>
+    <script src = "js/dygraph-combined-dev.js"></script>
+    <script src = "js/bootstrap-toggle.min.js"></script>
+    <script src = "js/jquery.matchHeight-min.js"></script>
+    <script src = "js/leftside_device_list.js"></script>
+
+<script src = "js/device_manager/device_manager.js"></script>
+
+  </body>	
+</html>

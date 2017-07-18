@@ -111,37 +111,8 @@
         <!-- Optionally, you can add icons to the links -->
         <li id = "home" class="side-label"><a href='home.html'><i class="fa fa-home"></i> <span>Home</span></a></li>
 
-        <li id = "dashboards" class="treeview side-label">
-          <a href="#">
-            <i class="fa fa-pie-chart"></i> <span>Dashboards</span>
-            <span class="pull-right-container">
-              <i class="fa fa-angle-down pull-right"></i>
-            </span>
-          </a>
-
-
-          <ul class="treeview-menu">
-              <!--{% for device in listOfDevices %}-->
-            <li id="{{device.id}}">
-
-              <a href="/accounts/loggedin/{{device.id}}/"><i class="fa fa-circle-o"></i> {{ device }}
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-down pull-right"></i>
-                </span>
-              </a>
-
-              <ul class="treeview-menu">
-                <li id="live-{{device.id}}"><a href="index.html"><i id="fafa-live-{{device.id}}" class="fa fa-circle-o"></i> Live Dashboard</a></li>
-                <li id="historical-{{device.id}}">
-                  <a href="historicalDashboard.html"><i id="fafa-historical-{{device.id}}" class="fa fa-circle-o"></i> Historical Dashboard </a>
-                  <!--ref = "/accounts/loggedin/{{device.id}}/historicalDashboard/" -->
-                </li>
-              </ul>
-
-            </li>
-              <!--{% endfor %}-->
-          </ul>
-        </li>
+        <li id = "livedashboards" class = "side-label"><a href='index.html'><i class="fa fa-dashboard"></i> <span>Live Dashboard</span></a></li> 
+        <li id = "historicaldashboards" class = "side-label"><a href='historicalDashboard.html'><i class="fa fa-area-chart"></i> <span>Historical Dashboard</span></a></li> 
 
       <li id = "devicemanager" class = "side-label"><a href='device_manager.html'><i class="fa fa-th"></i> <span>Device Manager</span></a></li>
       <li id = "profile" class = "side-label"><a href='{% url "profile" %}'><i class="fa fa-user"></i> <span>Profile</span></a></li>
@@ -171,16 +142,16 @@
 
           <!-- top tiles -->
           <div class="container-fluid">
-          <div class="row tile_count">
+          <div class="row">
             <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top"><i class="fa fa-signal" aria-hidden="true"></i> Device Status</span>
               <div class="count" id = "deviceStatus"></div>
 
             </div>
             <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
-              <span class="count_top"><i class="fa fa-compass" aria-hidden="true"></i> Location </span>
+              <span class="count_top"><i class="fa fa-compass" aria-hidden="true"></i> Signal Strength (RSSI) </span>
               <div id="rssi-indicator" class="count"></div>
-              <span class="count_bottom"><i class="fa fa-sort-asc"></i><i id = "rssi"></i> dBm RSSI</span>
+              <span class="count_bottom"><i id = "rssi"></i> </span>
             </div>
             <!--<div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
 
@@ -192,13 +163,14 @@
             <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top"><i class="fa fa-tablet" aria-hidden="true"></i> Autonomy </span>
               <div class="count" id= "live_autonomy"></div>
-              <span class="count_bottom"><i class="fa fa-sort-asc"></i>time until device is off </i> </span>
             </div>
             <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top"><i class="fa fa-battery-half" aria-hidden="true"></i> Battery Level</span>
               <div class="count" id = "batteryvalue"></div>
-              <span class="count_bottom"><i class="fa fa-sort-asc"></i><span id= "light_indicator"></span> Light Exposure </span>
-              
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+              <span class="count_top"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> Light Exposure</span>
+              <div class="cout" id = "light_indicator"></div>
             </div>
           </div>
 
@@ -207,7 +179,7 @@
 
             <div class="container-fluid">
                 <div class = "row">
-                        <div class="col-md-4">
+                        <div class="col-md-4" id="temperaturebox" style="padding-top:15px">
                             <div class="box box-gray">
                             <div class="box-header with-border">
                                 <h3 class="box-title title">Temperature</h3>
@@ -227,7 +199,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-4" id="humiditybox" style="padding-top:15px">
                                 <div class="box box-gray">
                                     <div class="box-header with-border">
                                         <h3 class="box-title title">Humidity</h3>
@@ -247,7 +219,7 @@
                                 </div>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-4" id="pressurebox" style="padding-top:15px">
                             <div class="box box-gray">
                                     <div class="box-header with-border">
                                         <h3 class="box-title title">Pressure</h3>
@@ -261,36 +233,87 @@
                                     <div class="box-body no-padding">
                                         <div class = "gauge-section">
                                             <canvas id="pressuregauge" class="gauge" height="105"></canvas>
-                                            <label id = "pressurevalue" class = "labels"> Pressure </label>
+                                            <label id = "pressurevalue" class = "labels">  </label>
                                         </div>
 
                                     </div>
                                 </div>
-                         </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id= "CO2box" style="padding-top:15px">
+                            <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">CO2 level</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="box-body no-padding">
+                                <div class = "gauge-section">
+                                <canvas id="CO2gauge" class="gauge" height="105"></canvas>
+                                <label id = "CO2value" class = "labels"></label>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+
+            </div>
+
+
+
+            </div>
+
+
+      <div >
+                <!-- UUID INPUT -->
+        <div class="input-group" style="padding-top: 20px; padding-bottom:20px;">
+              <input id="uuid" type="text" class="form-control" placeholder="Gateway ID">
+        </div>
+      </div>
+             
+          <div class = "row">
+            <div class="col-md-8">
+                <div class="box box-success box-solid collapsed-box">
+                    <div class="box-header with-border" id = "getterbox" data-widget="collapse">
+                        <i id = "scanfafa" class="fa fa-link" aria-hidden="true"></i>
+                        <h3 class="box-title">Get Connected Devices</h3>
+                          <!-- /.box-tools -->
+                    </div>
+                <!-- /.box-header -->
+                <div  id = "connecteddevices">
+                    <ul class="list-group" id =  "listconnecteddevices">
+
+                    </ul>
 
 
                 </div>
-            </div>
+                <div id = "loading">
+
+                </div>
+                <!-- /.box-body -->
+              </div>
+              <!-- /.box -->
+        </div>
+      </div>
 
 
-
-            </div>
-
-             
-      <!-- UUID INPUT -->	
-      <div class="row">
+      <div class="row" style="padding-bottom: 20px">
         <div class="col-lg-12">
           <div class="input-group">
-            <input id="uuid" type="text" class="form-control" placeholder="Device ID">
             <span class="input-group-btn">
-              <button id="uuidConfirm" class="btn btn-default" type="button" onclick="connectOnClick()">Connect</button>
+              <button id="uuidConfirm" class="btn btn-default" type="button" onclick="connectOnClick()">Get Live Data</button>
             </span>
           </div>
         </div>
       </div>
 
 
-            <div class = "container-fluid">
+            <div class = "container-fluid" id="tempGraph">
                 <div class = "row">
                     <div class="box box-gray">
                             <div class="box-header with-border">
@@ -310,28 +333,6 @@
                                         </div>
                                         
                                     </div>
-                                     <div class="col-md-2">
-                                      <div class="pad box-pane-right box-pane-meteo" style="min-height: 380px">
-                                        <div class="description-block margin-bottom">
-                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-up fa-3x" aria-hidden="true"></i></div>
-                                          <h5 class="description-header" id = "temperature-high" >{{ daily_temp_max }} °C</h5>
-                                          <span class="description-text">DAILY HIGH</span>
-                                        </div>
-                                        <!-- /.description-block -->
-                                        <div class="description-block margin-bottom">
-                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-minus-circle fa-3x" aria-hidden="true"></i></div>
-                                          <h5 class="description-header" id = "temperature-avg">{{ daily_temp_avrg }} °C</h5>
-                                          <span class="description-text">DAILY AVERAGE</span>
-                                        </div>
-                                        <!-- /.description-block -->
-                                        <div class="description-block">
-                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-down fa-3x" aria-hidden="true"></i></div>
-                                           <h5 class="description-header" id = "temperature-low">{{ daily_temp_min }} °C</h5>
-                                          <span class="description-text">DAILY LOW</span>
-                                        </div>
-                                        <!-- /.description-block -->
-                                      </div>
-                                    </div>
                                  </div>
                             </div>
                     </div>
@@ -342,9 +343,8 @@
                     </div>
                 </div>
 
-              <div class = "container-fluid">
+              <div class = "container-fluid" id="accelGraph">
                 <div class = "row">
-                    <div class="col-md-12">
                     <div class="box box-gray">
                             <div class="box-header with-border">
                                 <h3 class="box-title title">Accelerometer data (mg)</h3>
@@ -402,7 +402,6 @@
                                  </div>
                             </div>
                     </div>
-                    </div>
                 </div>
             </div>
 
@@ -410,8 +409,10 @@
           
 
 
-
-
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
 
 
 
@@ -426,13 +427,13 @@
 
 
       <!-- Main Footer -->
-  <footer class="main-footer">
+  <footer class="main-footer" style="position:relative">
     <!-- To the right -->
     <div class="pull-right hidden-xs">
       Deploy, Everywhere!
     </div>
     <!-- Default to the left -->
-    <strong>Copyright &copy; 2016 <a href="#">WibiSmart</a>.</strong> All rights reserved.
+    <strong>Copyright &copy; 2017 <a href="#">Wibicom Inc</a>.</strong> All rights reserved.
   </footer>
 
   <!-- Control Sidebar -->
@@ -527,10 +528,10 @@
   
 
 
-    <script type="text/javascript" src="http://d3js.org/d3.v2.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3.v2.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/three.js/r67/three.js"></script>
     <script type="text/javascript" src="js/OrbitControls.js"></script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript" src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
     <script type="text/javascript" src="https://d1fxtkz8shb9d2.cloudfront.net/websocket-multiplex-0.1.js"></script>
     <script type="text/javascript" src="js/stats.js"></script>
@@ -538,7 +539,6 @@
     <script src = "js/gauge.min.js"></script>
     <script src="js/dygraph-combined.js"></script>
     <script src = "js/dygraph-combined-dev.js"></script>
-    <script src="../js/node_modules\dygraphs\src\dygraph.js"></script>
     <script src = "js/bootstrap-toggle.min.js"></script>
     <script src = "js/jquery.matchHeight-min.js"></script>
     <script src = "js/leftside_device_list.js"></script>

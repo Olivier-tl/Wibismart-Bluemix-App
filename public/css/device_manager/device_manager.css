@@ -1,0 +1,36 @@
+.box-title{
+    font-weight: bold;
+
+
+}
+
+.bold{
+   font-weight: bold;
+   font-size: 18px;
+}
+
+.btn-space {
+    margin-right: 5px;
+}
+
+#scanbox
+{
+    cursor: pointer;
+}
+
+.btn-settings{
+    padding: 20px;
+    float: right;
+}
+
+.deviceStatus{
+    font-weight: bold;
+}
+
+.connection-btn{
+
+}
+
+.list-group li:hover {
+    background-color: #f1f1f1;
+}

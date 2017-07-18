@@ -10,6 +10,7 @@ var cfenv = require('cfenv');
 var properties = require('properties');
 var Cloudant = require('cloudant');
 var Client = require('ibmiotf');
+const toCSV = require('array-to-csv');
 
 var appClientConfig = {
     "org" : "4rxa4d",
@@ -77,11 +78,13 @@ function start(deviceId, apiKey, apiToken, mqttHost, mqttPort) {
   var accelChannel = multiplexer.registerChannel('accel');
   var airChannel = multiplexer.registerChannel('air');
   var lightChannel = multiplexer.registerChannel('health');
+  var CO2Channel = multiplexer.registerChannel('CO2');
   var batteryChannel = multiplexer.registerChannel('battery');
   var locationChannel = multiplexer.registerChannel('location');
   var dataBaseChannel = multiplexer.registerChannel('dataBase');
   var scanChannel = multiplexer.registerChannel('scanCommand');
   var connectionChannel = multiplexer.registerChannel('connectionCommand');
+  var disconnectionChannel = multiplexer.registerChannel('disconnectionCommand');
   var sensorToggleChannel = multiplexer.registerChannel('sensorToggleCommand');
   var sensorPeriodChannel = multiplexer.registerChannel('sensorPeriodCommand');
   var getterChannel = multiplexer.registerChannel('getterChannel');
@@ -106,7 +109,7 @@ function start(deviceId, apiKey, apiToken, mqttHost, mqttPort) {
     return function(conn) {
       var mqttTopic;
       console.log('Entering onConnection()' + 'Topic' + topicPath);
-      conn.subscribed = false;
+      conn.lastSubscribedId = null;
       // These listeners behave very strange.  You would think that events would be 
       // broadcast on a per channel per connection basis but that is not the case.
       // Any event is broadcast across all channel and all connections, hence the
@@ -129,18 +132,26 @@ function start(deviceId, apiKey, apiToken, mqttHost, mqttPort) {
       conn.on('data', function(data) {
         var dataObj = JSON.parse(data);
         console.log('Received data. Looking to subscribe')
-        if(this.subscribed == false && dataObj.deviceId && this.topic === conn.topic && this.conn.id == conn.conn.id) {
-          this.subscribed = true;
+        if(dataObj.deviceId && this.topic === conn.topic && this.conn.id == conn.conn.id) {
           mqttTopic = 'iot-2/type/+/id/' + dataObj.deviceId + topicPath;
-          console.log('Subscribing to topic ' + mqttTopic);
-          if(!mqttTopics[mqttTopic] || mqttTopics[mqttTopic].length == 0) {
-            mqttTopics[mqttTopic] = [conn];
-            client.subscribe(mqttTopic, {qos : 0}, function(err, granted) {
-              if (err) throw err;
-              console.log("subscribed");
-            });
-          } else {
-            mqttTopics[mqttTopic].push(conn);
+            if (this.lastSubscribedId != dataObj.deviceId) {
+              if(this.lastSubscribedId != null) {
+                var lastMqttTopic = 'iot-2/type/+/id/' + this.lastSubscribedId + topicPath;
+                client.unsubscribe(lastMqttTopic);
+                delete mqttTopics[lastMqttTopic];
+                console.log("Unsubscribing to " + lastMqttTopic);
+              }
+              this.lastSubscribedId = dataObj.deviceId;
+            console.log('Subscribing to topic ' + mqttTopic);
+            if(!mqttTopics[mqttTopic] || mqttTopics[mqttTopic].length == 0) {
+              mqttTopics[mqttTopic] = [conn];
+              client.subscribe(mqttTopic, {qos : 0}, function(err, granted) {
+                if (err) throw err;
+                console.log("subscribed");
+              });
+            } else {
+              mqttTopics[mqttTopic].push(conn);
+            }
           }
         }
       });
@@ -156,12 +167,16 @@ function dataRequest() {
     });
 
     conn.on('data', function(data) {
+      var clientUpdate = setInterval(function() {
+        conn.write(JSON.stringify({update:"."}));
+      }, 2000);
       var lightData = [];
       var batteryData = [];
       var accelData = [];
       var temperatureData = [];
       var pressureData = [];
       var humidityData = [];
+      var CO2Data = [];
       var rssiData = [];
       var dbList = [];
       var requestObj = JSON.parse(data);
@@ -189,7 +204,7 @@ function dataRequest() {
           if ( compareDate(startDate, tempDate) > 0 && compareDate(tempDate, endDate) > 0 ) { //for each database, we check if it is in the correct timeframe.
             counter++;
             var tempInstance = cloudant.db.use(allDbs[i]);
-            
+            console.log(tempDate);
             dbList.push(tempInstance);
             
 
@@ -209,6 +224,8 @@ function dataRequest() {
 
       function querry(tempInstance, dblength, index, thisUuid) {
         console.log('querry for ' + thisUuid +" device "+(deviceIndex+1)+ "/"+ totalDevices + " database " + index + "/" + dblength);
+        conn.write(JSON.stringify({message:"Querying data base for " + dbList[index-1].config.db.split('_')[3] + " for device " + thisUuid + ". (" + index + "/" + dblength + " databases)"}));
+        //console.log("Querying data base for " + dbList[index-1].config.db.split('_')[3] + " for device " + thisUuid + ". (" + index + "/" + dblength + " database(s))")
             tempInstance.find({ //this will get all the data in a specific instance of a database with a given device id
               "selector": {
                 "deviceId" : thisUuid
@@ -229,7 +246,7 @@ function dataRequest() {
                 if (err) {
                   throw err;
                 }
-                for (var i = 0; i < result.docs.length; i++) {
+                for (var i = 0; i < result.docs.length; i++) {//here we push all the point into the appropriate data array
                   var tempDataSet = [];
                   switch(result.docs[i].eventType) {
                     case 'health':
@@ -240,6 +257,13 @@ function dataRequest() {
                       
                       lightData.push(tempDataSet);
                       break;
+                    case 'CO2':
+                      tempDataSet.push(result.docs[i].timestamp);
+                      extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
+                      tempDataSet.push(result.docs[i].data.d.CO2);
+                      extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
+
+                      CO2Data.push(tempDataSet);
                     case 'battery':
                       tempDataSet.push(result.docs[i].timestamp);
                       extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
@@ -298,7 +322,22 @@ function dataRequest() {
                 if(doneCounter == counter && sent[thisUuid] == false) { //this is executed when all databases have been processed and the data has been pushed
                   sent[thisUuid] = true;
                   if(deviceIndex == totalDevices - 1) {
-                    sendDataBack(conn, lightData, batteryData, temperatureData, pressureData, humidityData, accelData, rssiData);
+                    var chartData = {};
+                    chartData.lightData = lightData;
+                    chartData.batteryData = batteryData;
+                    chartData.temperatureData = temperatureData;
+                    chartData.pressureData = pressureData;
+                    chartData.humidityData = humidityData;
+                    chartData.CO2Data = CO2Data;
+                    chartData.accelData = accelData;
+                    chartData.rssiData = rssiData;
+                    clearInterval(clientUpdate);
+                    conn.write(JSON.stringify({update:"done"}));
+                    sendDataBack(conn, chartData); // this is where the data for the graphs is sent back
+                    if (lightData.length != 0 || batteryData != 0 || temperatureData != 0 || pressureData != 0 || humidityData != 0 || CO2Data != 0 || rssiData != 0 || accelData != 0 ) {
+                      conn.write(JSON.stringify({message:"Data recieved. Now formatting CSV data."}));
+                    }
+                    sendCSVBack(conn, chartData); // this is where the csv data is formatted then sent back.
                   }
                   else {
                     doneCounter = 0;
@@ -312,7 +351,7 @@ function dataRequest() {
                 else if(index+4 < dblength && sent[thisUuid] == false) {
                   setTimeout(function() {
                     console.log('timeout');
-                    querry(dbList[index], dblength, index+5, thisUuid);
+                    querry(dbList[index+4], dblength, index+5, thisUuid);
                   }, 1500);
                 }
             });// end of find
@@ -369,26 +408,106 @@ function compareDate(inputDate1, inputDate2) {
 	return -1;
 }
 
-
-
-function sendDataBack(conn, lightData, batteryData, temperatureData, pressureData, humidityData, accelData, rssiData) {
-    var chartData = {};
-    chartData.lightData = lightData;
-    chartData.batteryData = batteryData;
-    chartData.temperatureData = temperatureData;
-    chartData.pressureData = pressureData;
-    chartData.humidityData = humidityData;
-    chartData.accelData = accelData;
-    chartData.rssiData = rssiData;
-    console.log("Sending back data to the client");
-    conn.write(JSON.stringify(chartData));
-
-
+function sortByDate(lightData, batteryData, temperatureData, pressureData, humidityData, CO2Data, accelData, rssiData) { // this fnction is used to sort the dates when the clients asks for csv
+  lightData.sort(compareFunction);
+  batteryData.sort(compareFunction);
+  accelData.sort(compareFunction);
+  temperatureData.sort(compareFunction);
+  pressureData.sort(compareFunction);
+  humidityData.sort(compareFunction);
+  CO2Data.sort(compareFunction);
+  rssiData.sort(compareFunction);
 }
+
+var compareFunction = function(a, b) {
+  return a[0].getTime() - b[0].getTime();
+}
+
+function parseTime(input) {
+  var timestamp = input.split('T');
+  var thisdate = timestamp[0].split('-');
+  var thistime = timestamp[1].split('.');
+  thistime = thistime[0];
+  thistime = thistime.split(':');
+  var dateString = thisdate[0] + "/" + thisdate[1] + "/" +  thisdate[2] + " " + thistime[0] + ":" + thistime[1] + ":" + thistime[2];
+  var out = new Date(dateString);
+  return out;
+}
+
+//this function takes as an input an 2D array and the name of the data to write it into a csv string
+function writeToCSV(data, name) {
+  if (data.length == 0) {
+    return "";
+  }
+  else if(typeof name == 'string') {
+    var labels = ["Timestamp"];
+    for(var i = 1; i < data[0].length; i++) {
+      labels.push(name + "_" + i);
+    }
+  }
+  else {
+    var labels = ["Timestamp"];
+    for (var i = 1; i < 1 + (data[0].length-1)/name.length; i++) {
+      for(var j = 0 ; j < name.length ; j++) {
+        labels.push(name[j] + '_' + i);
+      }
+    }
+  }
+  data.splice(0, 0, labels);
+  return toCSV(data);
+}
+
+function removeAllFirstEntries(data) {
+  for(char in data) {
+    var characteristic = data[char];
+    for(i in characteristic) {
+      characteristic[i].splice(0,1);
+    }
+  }
+}
+
+
+function sendDataBack(conn, chartData) {
+  console.log("Sending back data to the client");
+  chartData.csv = false;
+  conn.write(JSON.stringify(chartData));
+}
+
+//this function send the data back as a csv string
+function sendCSVBack(conn, chartData) {
+  console.log("Sending back csv to client");
+  for(char in chartData) { // goes throughall characteristics of the object
+    var characteristic = chartData[char];
+    for(i in characteristic) { //goes through the array of each characteristic
+      var entry = characteristic[i];
+      if (entry[0] != undefined && entry[0] != null && entry[0].length > 0) {
+        entry[0] = parseTime(entry[0]);
+        entry.splice(1, 0, entry[0].toString().split('-')[0]);
+      }
+    }
+  }
+  sortByDate(chartData.lightData, chartData.batteryData, chartData.temperatureData, chartData.pressureData, chartData.humidityData, chartData.CO2Data, chartData.accelData, chartData.rssiData);
+  removeAllFirstEntries(chartData);
+
+  chartData.lightData = writeToCSV(chartData.lightData, "light");
+  chartData.batteryData = writeToCSV(chartData.batteryData, "battery");
+  chartData.temperatureData = writeToCSV(chartData.temperatureData, "temperature");
+  chartData.pressureData = writeToCSV(chartData.pressureData, "pressure");
+  chartData.humidityData = writeToCSV(chartData.humidityData, "humidity");
+  chartData.CO2Data = writeToCSV(chartData.CO2Data, "CO2");
+  chartData.accelData = writeToCSV(chartData.accelData, ["x", "y", "z"]);
+  chartData.rssiData = writeToCSV(chartData.rssiData, "rssi");
+
+  chartData.csv = true;
+  conn.write(JSON.stringify(chartData));
+}
+
+
 
 function commandChannelConnected(topicPath) {
   return function(conn) {
-      conn.subscribed = false;
+        var mqttTopic;
+        conn.lastSubscribedId = null;
         console.log("Command channel connected" + topicPath);
         conn.on('close', function() {
           if(mqttTopic != undefined && mqttTopic && this.topic === conn.topic && this.conn.id == conn.conn.id) {
@@ -410,9 +529,16 @@ function commandChannelConnected(topicPath) {
       var dataObj = JSON.parse(data);
       console.log("Data recieved, sending "+ dataObj.commandName + " command... ");
       appClient.publishDeviceCommand(dataObj.deviceType, dataObj.deviceId, dataObj.commandName, "json", dataObj.payload);
-      if(this.subscribed == false && dataObj.deviceId && this.topic === conn.topic && this.conn.id == conn.conn.id) {
-          this.subscribed = true;
+      if(dataObj.deviceId && this.topic === conn.topic && this.conn.id == conn.conn.id) {
           mqttTopic = 'iot-2/type/+/id/' + dataObj.deviceId + topicPath;
+          if(this.lastSubscribedId != dataObj.deviceId) {
+            if(this.lastSubscribedId != null) {
+              var lastMqttTopic = 'iot-2/type/+/id/' + this.lastSubscribedId + topicPath;
+              client.unsubscribe(lastMqttTopic);
+              delete mqttTopics[lastMqttTopic];
+              console.log("Unsubscribing to " + lastMqttTopic);
+            }
+            this.lastSubscribedId = dataObj.deviceId;
           console.log('Subscribing to topic ' + mqttTopic);
           if(!mqttTopics[mqttTopic] || mqttTopics[mqttTopic].length == 0) {
             mqttTopics[mqttTopic] = [conn];
@@ -424,6 +550,7 @@ function commandChannelConnected(topicPath) {
             mqttTopics[mqttTopic].push(conn);
           }
         }
+      }
     });
   }
 }
@@ -436,10 +563,12 @@ accelChannel.onmessage = function(e) {
   airChannel.on('connection', onConnection('/evt/air/fmt/json'));
   lightChannel.on('connection', onConnection('/evt/health/fmt/json'));
   batteryChannel.on('connection', onConnection('/evt/battery/fmt/json'));
+  CO2Channel.on('connection', onConnection('/evt/CO2/fmt/json'));
   locationChannel.on('connection', onConnection('/evt/location/fmt/json'));
   dataBaseChannel.on('connection', dataRequest());
   scanChannel.on('connection', commandChannelConnected("/evt/scanResponse/fmt/json"));
   connectionChannel.on('connection', commandChannelConnected("/evt/connectionResponse/fmt/json"));
+  disconnectionChannel.on('connection', commandChannelConnected("/evt/disconnectionResponse/fmt/json"))
   sensorToggleChannel.on('connection', commandChannelConnected("/evt/sensorToggleResponse/fmt/json"));
   sensorPeriodChannel.on('connection', commandChannelConnected("/evt/sensorPeriodResponse/fmt/json"));
   getterChannel.on('connection', commandChannelConnected("/evt/getterResponse/fmt/json"));
@@ -471,5 +600,3 @@ var cloudant = Cloudant({account:me, password:password});
 
 cloudant.set_cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) { //enable CORS (cross-origin ressource sharing)
 });
-
-

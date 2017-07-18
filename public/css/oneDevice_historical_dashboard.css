@@ -1,0 +1,90 @@
+.content{
+    padding-top: 70px;
+}
+
+
+.dy-chart{
+    height: 320px;
+    padding-bottom : 0px;
+    padding-top : 20px;
+    padding-left: 20px;
+    padding-right: 50px;
+
+}
+
+.big-fa-fa{
+    font-size:60px;
+}
+
+.btn-toolbar-meteo{
+    margin-left: 80px;
+    margin-top: 60px;
+}
+
+.box-pane-whiteblue{
+    background-color: white;
+    color: #5bc0de;
+    padding-left: 40px;
+}
+
+.box-pane-meteo{
+    background-color: white;
+    color: #5bc0de;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    float: right;
+    padding-bottom: 0px;
+}
+
+.graph-col{
+        height: 380px;
+}
+
+.btn-toolbar{
+    margin-bottom: 10px;
+
+}
+
+.box-green{
+    border-top: 3px solid #5bc0de;
+
+}
+
+#test{
+    border-style: solid;
+    border-width: 5px;
+}
+
+.graph-label{
+    font-size: 20px;
+    font-weight: bold;
+    padding-top: 5px;
+    padding-left: 10px;
+    font-family:  'Josefin Sans', serif;
+
+}
+
+.btn-default{
+   margin-left: 10px;
+   width: 55px;
+
+}
+
+.dygraph-y2label{
+    position: absolute;
+    bottom: 10px;
+    left: 120px;
+
+}
+
+.pop-up-title{
+    font-size: 16px;
+    font-weight: bold;
+    font-family:  'Josefin Sans', serif;
+}
+
+.toolbar-downright{
+    margin-top: 60px;
+    float: right;
+}

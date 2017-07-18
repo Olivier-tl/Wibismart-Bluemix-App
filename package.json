@@ -1,6 +1,7 @@
 {
   "author": "IBM",
   "dependencies": {
+    "array-to-csv": "^1.0.1",
     "cfenv": "1.0.4",
     "cloudant": "^1.8.0",
     "dygraphs": "^2.0.0",
