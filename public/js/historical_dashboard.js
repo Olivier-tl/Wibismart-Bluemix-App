@@ -43,26 +43,25 @@ $('#csvelem').hide();
 	the data will then be pushed in the arrays above. to then be displayed on the html page.
 */
 function searchOnClick() {
-	console.log("Searching for data...");
-	$('#csvelem').slideUp();
 	uuid = document.getElementById('uuid').value;
     startDate = startDatePicker.dateSelected.toJSON().split('T')[0];
     endDate = endDatePicker.dateSelected.toJSON().split('T')[0];
-	//uuid = 'b0b448e49c80,b0b448e4bf03';
-	//startDate = '2017-05-25';
-	//endDate = '2017-05-26';
-	uuid.replace(/\s/g, " ");
-	uuid = uuid.split(",");
-	var requestObj = {};
-	requestObj.uuid = uuid;
-	requestObj.startDate = startDate;
-	requestObj.endDate = endDate;
-	var request = JSON.stringify(requestObj);
-	dataBaseChannel.send(request);
-	spinner = document.createElement("i");
-	spinner.setAttribute("class", "fa fa-spinner fa-pulse fa-3x fa-fw");
-	document.getElementById('timer').appendChild(spinner);
-	checkTimeout();
+	if(uuid && uuid.length > 0 && endDate && startDate) {
+		console.log("Searching for data...");
+		$('#csvelem').slideUp();
+		uuid.replace(/\s/g, " ");
+		uuid = uuid.split(",");
+		var requestObj = {};
+		requestObj.uuid = uuid;
+		requestObj.startDate = startDate;
+		requestObj.endDate = endDate;
+		var request = JSON.stringify(requestObj);
+		dataBaseChannel.send(request);
+		spinner = document.createElement("i");
+		spinner.setAttribute("class", "fa fa-spinner fa-pulse fa-3x fa-fw");
+		document.getElementById('timer').appendChild(spinner);
+		checkTimeout();
+	}
 }
 
 function checkTimeout() { // this is used to see if the server has timed out or not since the server is supposed to send updates every 2 seconds
@@ -105,7 +104,8 @@ dataBaseChannel.onmessage = function(e) {
 	&& dataObj.humidityData.length == 0 
 	&& dataObj.CO2Data.length == 0 
 	&& dataObj.rssiData.length == 0
-	&& dataObj.accelData.length == 0) {
+	&& dataObj.accelData.length == 0
+	&& dataObj.csv) {
 		renderMessage("The server has responded but the data you are looking for does not exist. Ckeck if your device ID is correct.")
 	}
 	else if(!dataObj.csv) {
@@ -122,6 +122,7 @@ dataBaseChannel.onmessage = function(e) {
 	}
 	else if (dataObj.csv) {
 		renderCSV(dataObj);
+		$('#deviceSelectionDropDown').hide();
 		renderGraphs();
 	}
 
@@ -227,7 +228,7 @@ function renderGraphs() {
 		document.getElementById("temperatureGraph").style.visibility = "visible";
 		temperatureGraph = new Dygraph(document.getElementById("temperatureGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
 		document.getElementById("temperatureGraph").style.width = "100%"
-		$('#temperatureGraph').fadeIn(4000);
+		$('#temperatureGraph').fadeIn(2000);
 		temperatureGraph = new Dygraph(document.getElementById("temperatureGraph") , temperatureCSV, {
 			connectSeparatedPoints: true,
 			ylabel: "Temperature (°C)"
@@ -241,7 +242,7 @@ function renderGraphs() {
 	if(pressureCSV.length > 0) {
 		$('#pressureGraphContainer').slideDown();
 		document.getElementById("pressureGraph").style.visibility = "visible";
-		$('#pressureGraph').fadeIn(4000);
+		$('#pressureGraph').fadeIn(2000);
 		pressureGraph = new Dygraph(document.getElementById("pressureGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
 		document.getElementById("pressureGraph").style.width = "100%"
 		pressureGraph = new Dygraph(document.getElementById("pressureGraph") , pressureCSV, {
@@ -257,7 +258,7 @@ function renderGraphs() {
 	if(humidityCSV.length > 0) {
 		$('#humidityGraphContainer').slideDown();
 		document.getElementById("humidityGraph").style.visibility = "visible";
-		$('#humidityGraph').fadeIn(4000);
+		$('#humidityGraph').fadeIn(2000);
 		humidityGraph = new Dygraph(document.getElementById("humidityGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
 		document.getElementById("humidityGraph").style.width = "100%"
 		humidityGraph = new Dygraph(document.getElementById("humidityGraph"), humidityCSV, {
@@ -273,7 +274,7 @@ function renderGraphs() {
 	if(batteryCSV.length > 0) {
 		$('#batteryGraphContainer').slideDown();
 		document.getElementById("batteryGraph").style.visibility = "visible";
-		$('#batteryGraph').fadeIn(4000);
+		$('#batteryGraph').fadeIn(2000);
 		batteryGraph = new Dygraph(document.getElementById("batteryGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
 		document.getElementById("batteryGraph").style.width = "100%"
 		batteryGraph = new Dygraph(document.getElementById("batteryGraph") , batteryCSV, {
@@ -289,7 +290,7 @@ function renderGraphs() {
 	if(lightCSV.length > 0) {
 		$('#lightLevelGraphContainer').slideDown();
 		document.getElementById("lightLevelGraph").style.visibility = "visible";
-		$('#lightLevelGraph').fadeIn(4000);
+		$('#lightLevelGraph').fadeIn(2000);
 		lightLevelGraph = new Dygraph(document.getElementById("lightLevelGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
 		document.getElementById("lightLevelGraph").style.width = "100%"
 		lightLevelGraph = new Dygraph(document.getElementById("lightLevelGraph"), lightCSV, {
@@ -305,7 +306,7 @@ function renderGraphs() {
 	if(CO2CSV.length > 0) {
 		$('#CO2GraphContainer').slideDown();
 		document.getElementById("CO2Graph").style.visibility = "visible";
-		$('#CO2Graph').fadeIn(4000);
+		$('#CO2Graph').fadeIn(2000);
 		CO2Graph = new Dygraph(document.getElementById("CO2Graph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
 		document.getElementById("CO2Graph").style.width = "100%"
 		CO2Graph = new Dygraph(document.getElementById("CO2Graph"), CO2CSV, {
@@ -322,7 +323,7 @@ function renderGraphs() {
 	if(rssiCSV.length > 0) {
 		$('#rssiGrapgContainer').slideDown();
 		document.getElementById("rssiGraph").style.visibility = "visible";
-		$('#rssiGraph').fadeIn(4000);
+		$('#rssiGraph').fadeIn(2000);
 		rssiGraph = new Dygraph(document.getElementById("rssiGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
 		document.getElementById("rssiGraph").style.width = "100%"
 		rssiGraph = new Dygraph(document.getElementById("rssiGraph"), rssiCSV, {
@@ -339,7 +340,7 @@ function renderGraphs() {
 	if(accelCSV.length > 0) {
 		$('#accelerometerGraphContainer').slideDown();
 		document.getElementById("accelerometerGraph").style.visibility = "visible";
-		$('#accelerometerGraph').fadeIn(4000);
+		$('#accelerometerGraph').fadeIn(2000);
 		accelGraph = new Dygraph(document.getElementById("accelerometerGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
 		document.getElementById("accelerometerGraph").style.width = "100%"
 		accelGraph = new Dygraph(document.getElementById("accelerometerGraph"), accelCSV, {
@@ -427,6 +428,7 @@ function renderCSV(dataObj) { // this fills the cvs variables and creates the ap
 
 	document.getElementById('csvelem').style.visibility = "visible";
 	document.getElementById('csv').value = "";
+	
 	$('#csvelem').slideDown();
 
 	

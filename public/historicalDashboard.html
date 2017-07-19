@@ -143,8 +143,22 @@
 
       <!-- Input -->
       <div class="row" style="padding-top:10px">
-        
-            <div class="col-lg-12">
+
+        <div class="col-lg-12">
+          <div class = class="input-group" style="padding-bottom:10px">
+              <!-- switch between search mode -->
+              <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Search Mode
+                <span class="caret"></span></button>
+                <ul class="dropdown-menu" id = "switchModeDropDown">
+                  <li id = "HistoricalMode" onclick="switchToggle('historical')">Historical Data</li>
+                  <li id = "BulkMode" onclick="switchToggle('bulk')">Bulk Data</li>
+                </ul>
+              </div>
+          </div>
+        </div>
+
+            <div class="col-lg-12" id = "historicalInputs">
                 <!-- UUID INPUT -->
                 <div class="input-group">
                     <input id="uuid" type="text" class="form-control" placeholder="Device ID">
@@ -160,12 +174,33 @@
                       <input id="enddate" type="text" class="form-control" placeholder="End date"></span>
                 </div>
                 <!-- end date input -->
+            </div>
 
-                
+
+            <div class="col-lg-12" id = "bulkInputs">
+                <!-- DATABASE NAME INPUT -->
+                <div class="input-group">
+                    <input id="databaseName" type="text" class="form-control" placeholder="Database name">
+                    <span class="input-group-btn">
+                        <button id="databaseNameConfirm" class="btn btn-default" type="button" onclick="queryBulkData()">Query Data</button>
+                    </span>
+                </div>
+            </div>
+                    
+              <div class="col-lg-12">
                 <div class="input-group" id = "csvelem">
                     <textarea id = "csv" name="Text1" class="form-control" cols="40" rows="5 "></textarea>
                     <span class = "input-group-btn">
-                      <div>
+                      
+                    <div class="dropdown" id="deviceSelectionDropDown">
+                      <button class="btn btn-primary dropdown-toggle" type="button" id="deviceToggleButton" data-toggle="dropdown">Device
+                      <span class="caret"></span></button>
+                      <ul class="dropdown-menu" id = "DeviceListDropDown">
+                        <li id = "Enviro M47" onclick="deviceToggle()">Enviro M47</li>
+                        <li id = "Enviro A43" onclick="deviceToggle()">Enviro A43</li>
+                      </ul>
+                    </div>
+
                     <div class="dropdown">
                       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Data Type
                       <span class="caret"></span></button>
@@ -178,20 +213,20 @@
                         <li id = "CO2CSV" onclick="dataToggle()">CO2</li>
                       </ul>
                     </div>
-                  </div>
+                  
                   </span>
                   </div>
+              </div>
 
+                <div class="col-lg-12">
                   <div class = "input-group" height = "100px">
                     <div id = "timer"></div>
                     <ul class = "list-group" id = "messages">
                     </ul>
                   </div>
-                  
+                </div>
 
-            
-        </div>
-      </div>
+                 </div>
 
 
 
@@ -760,6 +795,8 @@
 
     <script src="js/datepicker.min.js"></script>
     <script src = "js/historical_dashboard.js"></script>
+    <script src="js/bulk_data_dashboard.js"></script>
+    <script src="js/switchSearchMode.js"></script>
 
   </body>	
 </html>

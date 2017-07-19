@@ -82,6 +82,7 @@ function start(deviceId, apiKey, apiToken, mqttHost, mqttPort) {
   var batteryChannel = multiplexer.registerChannel('battery');
   var locationChannel = multiplexer.registerChannel('location');
   var dataBaseChannel = multiplexer.registerChannel('dataBase');
+  var bulkDataChannel = multiplexer.registerChannel('bulkData');
   var scanChannel = multiplexer.registerChannel('scanCommand');
   var connectionChannel = multiplexer.registerChannel('connectionCommand');
   var disconnectionChannel = multiplexer.registerChannel('disconnectionCommand');
@@ -380,12 +381,185 @@ function dataRequest() {
   }; //end of returning function
 };
 
+function onBulkDataConnection() {
+  return function(conn) {
+    console.log("Data channel connected");
+    conn.on('close', function() {
+        console.log("Data channel close");
+    });
 
+    conn.on('data', function(data) {
+      var requestObj = JSON.parse(data);
+      var targetName = null;
+      var out = {};
 
+      cloudant.db.list(function(err, allDbs){ //this gets a list of all the databases 
+        if (err) {
+            throw err;
+          }
+        for(var i = 0 ; i < allDbs.length ; i++ ) {
+          if(allDbs[i].indexOf("iotp_4rxa4d_default_") == -1 && requestObj.databaseName == allDbs[i]) {
+            targetName = allDbs[i];
+            break;
+          }
+        }//end of for loop
+        if(targetName != null) {
+          querryBulk(targetName); //make this function.
+        }
+        else {
+          console.log(requestObj.databaseName + " database not found.");
+          conn.write(JSON.stringify({update:"done"}));
+          conn.write(JSON.stringify({message:requestObj.databaseName + " database not found, try again."}));
+        }
+      });//end of list
+
+      function querryBulk(targetName) {
+        var clientUpdate = setInterval(function() {
+          conn.write(JSON.stringify({update:"."}));
+         }, 2000);
+        console.log("Searching database " + targetName);
+        conn.write(JSON.stringify({message:targetName + " database found, starting querry..."}));
+        var targetDatabase = cloudant.db.use(targetName);
+        targetDatabase.find({ //this will get all the documents from the specified database.
+            "selector": {
+            },
+            "fields": [
+              "timestamp",
+              "data.d",
+              "eventType",
+              "localName",
+              "deviceId"
+
+            ],
+            "sort": [
+              
+            ]
+          }, function(err, result) {
+            if (err) {
+              throw err;
+            }
+            else {
+              data = result.docs;
+              for(i in data) {
+                //console.log(JSON.stringify(result[i]));
+                thisResult = data[i];
+                if(out[thisResult.localName]) {
+                  out[thisResult.localName].setReading(thisResult);
+                }
+                else {
+                  out[thisResult.localName] = new DeviceDataSet();
+                  out[thisResult.localName].setReading(thisResult);
+                }
+              }
+              
+              for(i in out) {// we go throughh each deviceData
+                var thisDeviceData = out[i];
+                for(j in thisDeviceData) { // we go through each characteristic
+                  var thisChar = thisDeviceData[j];
+                  for(k in thisChar) {
+                    var entry = thisChar[k];
+                    if (entry[0] != undefined && entry[0] != null && entry[0].length > 0) {
+                      entry[0] = parseTime(entry[0]);
+                      entry.splice(1, 0, entry[0].toString().split('-')[0]);
+                    }
+                  }
+                }
+              }
+              
+              for(i in out) {// we go throughh each deviceData
+                var thisDeviceData = out[i];
+                for(j in thisDeviceData) { // we go through each characteristic
+                  var thisChar = thisDeviceData[j];
+                  for(k in thisChar) {
+                    thisChar.sort(compareFunction);
+                  }
+                }
+              }
+              
+              for(i in out) {
+                var thisDevice = out[i];
+                removeAllFirstEntries(thisDevice);
+                allCharToCSV(thisDevice);
+              }
+              clearInterval(clientUpdate);
+              conn.write(JSON.stringify({update:"done"}));
+              console.log("Sending bulk data back...");
+              conn.write(JSON.stringify(out));
+            }
+        });
+      }
+    });
+  };
+};
+
+function DeviceDataSet() {
+  this.accelData = [];
+  this.temperatureData = [];
+  this.pressureData = [];
+  this.humidityData = [];
+  this.CO2Data = [];
+  this.lightData = [];
+  this.batteryData = [];
+  this.rssiData = [];
+}
+
+DeviceDataSet.prototype.setReading = function(dataPoint) {
+  var tempDataSet = [];
+  tempDataSet.push(dataPoint.timestamp);
+  switch(dataPoint.eventType) {
+    case 'air':
+      tempDataSet.push(dataPoint.data.d.temperature);
+
+      this.temperatureData.push(tempDataSet);
+      tempDataSet = [];
+
+      tempDataSet.push(dataPoint.timestamp);
+      tempDataSet.push(dataPoint.data.d.humidity);
+
+      this.humidityData.push(tempDataSet);
+      tempDataSet = [];
+
+      tempDataSet.push(dataPoint.timestamp);
+      tempDataSet.push(dataPoint.data.d.pressure);
+      this.pressureData.push(tempDataSet);
+      break;
+    case 'light':
+      tempDataSet.push(dataPoint.data.d.light);
+
+      this.lightData.push(tempDataSet);
+      break;
+    case 'CO2':
+      tempDataSet.push(dataPoint.data.d.CO2);
+
+      this.CO2Data.push(tempDataSet);
+      break;
+    case 'accel':
+      tempDataSet.push(dataPoint.data.d.x);
+      tempDataSet.push(dataPoint.data.d.y);
+      tempDataSet.push(dataPoint.data.d.z);
+
+      this.accelData.push(tempDataSet);
+      break;
+    case 'bettery':
+      tempDataSet.push(dataPoint.data.d.batteryLevel);
+
+      this.batteryData.push(tempDataSet);
+      break;
+    case 'location':
+      tempDataSet.push(dataPoint.data.d.rssi);
+
+      this.rssiData.push(tempDataSet);
+    default: 
+      break;
+  }
+}
 
 
 //this function cheks if the input is between the end and start date. returns 1 if date1 happens before or same day as date2 and -1 for the other way around
 function compareDate(inputDate1, inputDate2) {
+  if(!inputDate1 || !inputDate2) {
+    return -1;
+  }
 	var date1 = inputDate1.split('-');
 	var date2 = inputDate2.split('-');
 	
@@ -419,6 +593,17 @@ function sortByDate(lightData, batteryData, temperatureData, pressureData, humid
   rssiData.sort(compareFunction);
 }
 
+function allCharToCSV(chartData) {
+  chartData.lightData = writeToCSV(chartData.lightData, "light");
+  chartData.batteryData = writeToCSV(chartData.batteryData, "battery");
+  chartData.temperatureData = writeToCSV(chartData.temperatureData, "temperature");
+  chartData.pressureData = writeToCSV(chartData.pressureData, "pressure");
+  chartData.humidityData = writeToCSV(chartData.humidityData, "humidity");
+  chartData.CO2Data = writeToCSV(chartData.CO2Data, "CO2");
+  chartData.accelData = writeToCSV(chartData.accelData, ["x", "y", "z"]);
+  chartData.rssiData = writeToCSV(chartData.rssiData, "rssi");
+}
+
 var compareFunction = function(a, b) {
   return a[0].getTime() - b[0].getTime();
 }
@@ -442,14 +627,24 @@ function writeToCSV(data, name) {
   else if(typeof name == 'string') {
     var labels = ["Timestamp"];
     for(var i = 1; i < data[0].length; i++) {
-      labels.push(name + "_" + i);
+      if(data[0].length == 2) {
+        labels.push(name);
+      }
+      else {
+        labels.push(name + "_" + i);
+      }
     }
   }
   else {
     var labels = ["Timestamp"];
     for (var i = 1; i < 1 + (data[0].length-1)/name.length; i++) {
       for(var j = 0 ; j < name.length ; j++) {
-        labels.push(name[j] + '_' + i);
+        if(data[0].length == 4) {
+          labels.push(name[j]);
+        }
+        else {
+          labels.push(name[j] + '_' + i);
+        }
       }
     }
   }
@@ -489,14 +684,7 @@ function sendCSVBack(conn, chartData) {
   sortByDate(chartData.lightData, chartData.batteryData, chartData.temperatureData, chartData.pressureData, chartData.humidityData, chartData.CO2Data, chartData.accelData, chartData.rssiData);
   removeAllFirstEntries(chartData);
 
-  chartData.lightData = writeToCSV(chartData.lightData, "light");
-  chartData.batteryData = writeToCSV(chartData.batteryData, "battery");
-  chartData.temperatureData = writeToCSV(chartData.temperatureData, "temperature");
-  chartData.pressureData = writeToCSV(chartData.pressureData, "pressure");
-  chartData.humidityData = writeToCSV(chartData.humidityData, "humidity");
-  chartData.CO2Data = writeToCSV(chartData.CO2Data, "CO2");
-  chartData.accelData = writeToCSV(chartData.accelData, ["x", "y", "z"]);
-  chartData.rssiData = writeToCSV(chartData.rssiData, "rssi");
+  allCharToCSV(chartData);
 
   chartData.csv = true;
   conn.write(JSON.stringify(chartData));
@@ -566,6 +754,7 @@ accelChannel.onmessage = function(e) {
   CO2Channel.on('connection', onConnection('/evt/CO2/fmt/json'));
   locationChannel.on('connection', onConnection('/evt/location/fmt/json'));
   dataBaseChannel.on('connection', dataRequest());
+  bulkDataChannel.on('connection', onBulkDataConnection());
   scanChannel.on('connection', commandChannelConnected("/evt/scanResponse/fmt/json"));
   connectionChannel.on('connection', commandChannelConnected("/evt/connectionResponse/fmt/json"));
   disconnectionChannel.on('connection', commandChannelConnected("/evt/disconnectionResponse/fmt/json"))
