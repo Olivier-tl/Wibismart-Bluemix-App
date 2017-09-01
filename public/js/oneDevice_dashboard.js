@@ -29,6 +29,7 @@ $('#pressurebox').hide();
 $('#humiditybox').hide();
 $('#UVbox').hide();
 $('#soundbox').hide();
+$('#PMbox').hide();
 $('#CO2box').hide();
 $('#SO2box').hide();
 $('#CObox').hide();
@@ -104,6 +105,7 @@ getterChannel.onmessage = function(e) {
       $('#humiditybox').hide();
 			$('#UVbox').hide();
 			$('#soundbox').hide();
+			$('#PMbox').hide();
       $('#CO2box').hide();
 			$('#SO2box').hide();
 			$('#CObox').hide();
@@ -152,32 +154,39 @@ getterChannel.onmessage = function(e) {
 					}
         }
 				CO2Channel.send(data);
-				if (info.SO2SensorOn) {
+				if (info.SO2SensorOn == 1) {
           $('#SO2box').fadeIn(2000);
 					if(info.lastSO2Data) {
 						sensorData.setReading("SO2", parseFloat(info.lastSO2Data));
   					$("#SO2value").html(info.lastSO2Data + " ppm");
 					}
         }
-				if (info.COSensorOn) {
+				if (info.COSensorOn == 1) {
           $('#CObox').fadeIn(2000);
 					if(info.lastCOData) {
 						sensorData.setReading("CO", parseFloat(info.lastCOData));
   					$("#COvalue").html(info.lastCOData + " ppm");
 					}
         }
-				if (info.O3SensorOn) {
+				if (info.O3SensorOn == 1) {
           $('#O3box').fadeIn(2000);
 					if(info.lastO3Data) {
 						sensorData.setReading("O3", parseFloat(info.lastO3Data));
   					$("#O3value").html(info.lastO3Data + " ppm");
 					}
         }
-				if (info.NO2SensorOn) {
+				if (info.NO2SensorOn == 1) {
           $('#NO2box').fadeIn(2000);
 					if(info.lastNO2Data) {
 						sensorData.setReading("NO2", parseFloat(info.lastNO2Data));
   					$("NO2value").html(info.lastNO2Data + " ppm");
+					}
+        }
+				if (info.PMSensorOn == 1) {
+          $('#PMbox').fadeIn(2000);
+					if(info.lastPMData) {
+						sensorData.setReading("PM", parseFloat(info.lastPMData));
+  					$("#PMvalue").html(info.lastPMData + " ug/m3");
 					}
         }
 				gasesChannel.send(data);
@@ -248,7 +257,9 @@ gasesChannel.onmessage = function(e) {
 	sensorData.setReading("O3", parseFloat(data.d.O3));
   $("#O3value").html(data.d.O3 + " ppm");
 	sensorData.setReading("NO2", parseFloat(data.d.NO2));
-  $("#CO2value").html(data.d.NO2 + " ppm");
+  $("#NO2value").html(data.d.NO2 + " ppm");
+	sensorData.setReading("PM", parseFloat(data.d.PM));
+  $("#PMvalue").html(data.d.PM + " ug/m3");
 }
 
 
@@ -308,6 +319,7 @@ function SensorData() {
 	this.UV = 0;
 	this.soundLevel = 0;
 	this.temperature = [];
+	this.PM = 0;
 	this.CO2 = 0;
 	this.SO2 = 0;
 	this.CO = 0;
@@ -347,6 +359,10 @@ SensorData.prototype.setReading = function(type, value) {
 		case "sound":
       this[type] = value;
       updateSoundGaugeValue();
+			break;
+		case "PM":
+      this[type] = value;
+      updatePMGaugeValue();
 			break;
 		case "SO2":
 			this[type] = value;
@@ -491,6 +507,10 @@ function updateHumidityGaugeValue() {
 
 function updatepressureGaugeValue() {
 	PressureGauge.getInstance().set(sensorData.pressure);
+}
+
+function updatePMGaugeValue() {
+	PMGauge.getInstance().set(sensorData.PM);
 }
 
 function updateSoundGaugeValue() {

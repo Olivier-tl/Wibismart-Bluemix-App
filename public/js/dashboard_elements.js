@@ -149,6 +149,43 @@ var SoundGauge = (function () {
     };
 })();
 
+var PMGauge = (function () {
+    var instance;
+
+    function createInstance() {
+        var opts = {
+          lines: 12, // The number of lines to draw
+          angle: 0.01, // The length of each line
+          lineWidth: 0.20, // The line thickness
+          pointer: {
+            length: 0.6, // The radius of the inner circle
+            strokeWidth: 0.030, // The rotation offset
+            color: '#000000' // Fill color
+          },
+          colorStart: '#757575',   // Colors
+          colorStop: '#757575',    // just experiment with them
+          strokeColor: '#E0E0E0',   // to see which ones work best for you
+          generateGradient: true
+        };
+        var target = document.getElementById('PMgauge'); // your canvas element
+        var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+        gauge.minValue = 0; // set min gauge value
+        gauge.maxValue = 400; // set max gauge value
+        gauge.animationSpeed = 1; // set animation speed (32 is default value)
+        gauge.set(5); // set actual value
+        return gauge;
+        }
+
+    return {
+        getInstance: function () {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+})();
+
 var CO2Gauge = (function () {
     var instance;
 

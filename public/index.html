@@ -305,6 +305,27 @@
                             </div>
                         </div>
 
+                        <div class="col-md-4" id="PMbox" style="padding-top:15px">
+                            <div class="box box-gray">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title title">PM Level</h3>
+
+                                        <div class="box-tools pull-right">
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('PMWidgetSubContainer')"><i class="fa fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('PMbox')"><i class="fa fa-times"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body no-padding"id="PMWidgetSubContainer">
+                                        <div class = "gauge-section">
+                                            <canvas id="PMgauge" class="gauge" height="105"></canvas>
+                                            <label id = "PMvalue" class = "labels">  </label>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
                         <div class="col-md-4" id="SO2box" style="padding-top:15px">
                             <div class="box box-gray">
                             <div class="box-header with-border">
