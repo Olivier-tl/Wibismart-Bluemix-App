@@ -1,3 +1,6 @@
+/*
+This script is used to make querries to a specific data base when the name of it is known to get all of its data.
+*/
 var sockjs_url = '/sensortag';
 var sockjs = new SockJS(sockjs_url);
 
@@ -29,7 +32,7 @@ bulkDataChannel.onopen = function() {
 	console.log("Bulk Data channel open");
 };
 
-bulkDataChannel.onmessage = function(e) {
+bulkDataChannel.onmessage = function(e) { //when we recieve bulk data from a database, we store that data and create buttons to select devices to look at dataof specific devices one at a time
     console.log("Response from server received!");
     var dataObj = JSON.parse(e.data);
     if (dataObj.message) {
@@ -65,15 +68,35 @@ bulkDataChannel.onmessage = function(e) {
             device.appendChild(document.createTextNode(i));
             deviceListDropDown.appendChild(device);
         }
+        clearAllGraphs();
     }
 }
 
-function deviceToggle(deviceName) {
+function deviceToggle(deviceName) { //this is trigered once the user clicks on a device, it will get the appropriate data in the bulk data and display it.
+    console.log("device toggle for device " + deviceName);
     document.getElementById("deviceToggleButton").innerHTML = deviceName;
     document.getElementById('csv').value = "";
     var thisDevice = bulkData[deviceName];
-	renderCSV(thisDevice);
+	renderCSV(thisDevice); //these two funtions are defined in the historicalDashboard.js file
     renderGraphs();
+}
+
+function clearAllGraphs() {
+	temperatureGraph = new Dygraph(document.getElementById("temperatureGraph"), [0], {});
+	pressureGraph = new Dygraph(document.getElementById("pressureGraph"), [0], {});
+	humidityGraph = new Dygraph(document.getElementById("humidityGraph"), [0], {});
+    UVGraph = new Dygraph(document.getElementById("UVGraph"), [0], {});
+    soundGraph = new Dygraph(document.getElementById("soundGraph"), [0], {});
+	batteryGraph = new Dygraph(document.getElementById("batteryGraph"), [0], {});
+	lightLevelGraph = new Dygraph(document.getElementById("lightLevelGraph"), [0], {});
+	CO2Graph = new Dygraph(document.getElementById("CO2Graph"), [0], {});
+    SO2Graph = new Dygraph(document.getElementById("SO2Graph"), [0], {});
+    COGraph = new Dygraph(document.getElementById("COGraph"), [0], {});
+    O3raph = new Dygraph(document.getElementById("O3Graph"), [0], {});
+    NO2Graph = new Dygraph(document.getElementById("NO2Graph"), [0], {});
+    PMGraph = new Dygraph(document.getElementById("PMGraph"), [0], {});
+	rssiGraph = new Dygraph(document.getElementById("rssiGraph"), [0], {});
+	accelGraph = new Dygraph(document.getElementById("accelerometerGraph"), [0], {});
 }
 
 function eraseMinMax() {
@@ -86,14 +109,35 @@ function eraseMinMax() {
     $("#humidity-high").html("");
 	$("#humidity-low").html("");
 
+    $("#UV-high").html("");
+	$("#UV-low").html("");
+
+    $("#sound-high").html("");
+	$("#sound-low").html("");
+
     $("#battery-high").html("");
 	$("#battery-low").html("");
 
     $("#light-high").html("");
 	$("#light-low").html("");
 
-    $("CO2-high").html("");
-	$("CO2-low").html("");
+    $("#CO2-high").html("");
+	$("#CO2-low").html("");
+
+    $("#SO2-high").html("");
+	$("#SO2-low").html("");
+
+    $("#CO-high").html("");
+	$("#CO-low").html("");
+
+    $("#O3-high").html("");
+	$("#O3-low").html("");
+
+    $("#NO2-high").html("");
+	$("#NO2-low").html("");
+
+    $("#PM-high").html("");
+	$("#PM-low").html("");
 
     $("#rssi-high").html("");
 	$("#rssi-low").html("");

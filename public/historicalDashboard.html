@@ -240,12 +240,12 @@
                                 <h3 class="box-title title">Temperature data (°C)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('temperatureSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('temperatureGraphContainer')"><i class="fa fa-times"></i></button>
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="temperatureSubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9">
                                         <div id = "temperatureGraph" height="120" width = "100%" padding-top = "30px" >
@@ -292,12 +292,13 @@
                                 <h3 class="box-title title">Humidity data (%)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('humiditySubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('humidityGraphContainer')"><i class="fa fa-times"></i></button>
+
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="humiditySubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9">
                                         <div id = "humidityGraph" height="120" width = "100%" padding-top = "30px">
@@ -341,12 +342,13 @@
                                 <h3 class="box-title title">Pressure data (mbar)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('pressureSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('pressureGraphContainer')"><i class="fa fa-times"></i></button>
+
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="pressureSubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9">
                                         <div id="pressureGraph" height="120" width = "100%" padding-top = "30px">
@@ -380,6 +382,103 @@
                     
                     </div>
                 </div>
+
+
+                 <!-- UV graph -->
+                <div class = "container-fluid" id = "UVGraphContainer">
+                <div class = "row">
+                    <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">UV data</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('UVSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('UVGraphContainer')"><i class="fa fa-times"></i></button>
+
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="UVSubContainer">
+                                 <div id = "column-wrap">
+                                    <div class="col-md-9">
+                                        <div id="UVGraph" height="120" width = "100%" padding-top = "30px">
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                     <div class="col-md-2">
+                                      <div class="pad box-pane-right box-pane-meteo" style="min-height: 380px">
+                                        <div class="description-block margin-bottom">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-up fa-3x" aria-hidden="true"></i></div>
+                                          <h5 class="description-header" id = "UV-high" ></h5>
+                                          <span class="description-text">HIGH</span>
+                                        </div>
+
+                                        <!-- /.description-block -->
+                                        <div class="description-block">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-down fa-3x" aria-hidden="true"></i></div>
+                                           <h5 class="description-header" id = "UV-low"></h5>
+                                          <span class="description-text">LOW</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                      </div>
+                                    </div>
+                                 </div>
+                            </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                
+                <!-- Sound Level graph -->
+                <div class = "container-fluid" id = "soundGraphContainer">
+                <div class = "row">
+                    <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">Sound Level data (dB)</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('soundSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('soundGraphContainer')"><i class="fa fa-times"></i></button>
+
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="soundSubContainer">
+                                 <div id = "column-wrap">
+                                    <div class="col-md-9">
+                                        <div id="soundGraph" height="120" width = "100%" padding-top = "30px">
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                     <div class="col-md-2">
+                                      <div class="pad box-pane-right box-pane-meteo" style="min-height: 380px">
+                                        <div class="description-block margin-bottom">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-up fa-3x" aria-hidden="true"></i></div>
+                                          <h5 class="description-header" id = "sound-high" ></h5>
+                                          <span class="description-text">HIGH</span>
+                                        </div>
+
+                                        <!-- /.description-block -->
+                                        <div class="description-block">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-down fa-3x" aria-hidden="true"></i></div>
+                                           <h5 class="description-header" id = "sound-low"></h5>
+                                          <span class="description-text">LOW</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                      </div>
+                                    </div>
+                                 </div>
+                            </div>
+                    </div>
+
+
+
+                    
+                    </div>
+                </div>
                 
 
                 <!-- battery graph -->
@@ -390,12 +489,13 @@
                                 <h3 class="box-title title">Battery Level data (%)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('batterySubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('batteryGraphContainer')"><i class="fa fa-times"></i></button>
+
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="batterySubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9">
                                         <div id = "batteryGraph" height="120" width = "100%" padding-top = "30px">
@@ -443,12 +543,13 @@
                                 <h3 class="box-title title">Light Level data (mV)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('lightSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('lightLevelGraphContainer')"><i class="fa fa-times"></i></button>
+
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="lightSubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9">
                                         <div id = "lightLevelGraph" height="120" width = "100%" padding-top = "30px">
@@ -490,15 +591,16 @@
                 <div class = "row">
                     <div class="box box-gray">
                             <div class="box-header with-border">
-                                <h3 class="box-title title">CO2 data (ppm)</h3>
+                                <h3 class="box-title title">CO<sub>2</sub> data (ppm)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('CO2SubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('CO2GraphContainer')"><i class="fa fa-times"></i></button>
+
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="CO2SubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9">
                                         <div id="CO2Graph" height="120" width = "100%" padding-top = "30px">
@@ -536,6 +638,260 @@
 
 
 
+                <!-- SO2 graph -->
+                <div class = "container-fluid" id = "SO2GraphContainer">
+                <div class = "row">
+                    <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">SO<sub>2</sub> data (ppb)</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('SO2SubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('SO2GraphContainer')"><i class="fa fa-times"></i></button>
+
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="SO2SubContainer">
+                                 <div id = "column-wrap">
+                                    <div class="col-md-9">
+                                        <div id="SO2Graph" height="120" width = "100%" padding-top = "30px">
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                     <div class="col-md-2">
+                                      <div class="pad box-pane-right box-pane-meteo" style="min-height: 380px">
+                                        <div class="description-block margin-bottom">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-up fa-3x" aria-hidden="true"></i></div>
+                                          <h5 class="description-header" id = "SO2-high" ></h5>
+                                          <span class="description-text">HIGH</span>
+                                        </div>
+
+                                        <!-- /.description-block -->
+                                        <div class="description-block">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-down fa-3x" aria-hidden="true"></i></div>
+                                           <h5 class="description-header" id = "SO2-low"></h5>
+                                          <span class="description-text">LOW</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                      </div>
+                                    </div>
+                                 </div>
+                            </div>
+                    </div>
+
+
+
+                    
+                    </div>
+                </div>
+
+
+
+                                <!-- CO graph -->
+                <div class = "container-fluid" id = "COGraphContainer">
+                <div class = "row">
+                    <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">CO data (ppm)</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('COSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('COGraphContainer')"><i class="fa fa-times"></i></button>
+
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="COSubContainer">
+                                 <div id = "column-wrap">
+                                    <div class="col-md-9">
+                                        <div id="COGraph" height="120" width = "100%" padding-top = "30px">
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                     <div class="col-md-2">
+                                      <div class="pad box-pane-right box-pane-meteo" style="min-height: 380px">
+                                        <div class="description-block margin-bottom">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-up fa-3x" aria-hidden="true"></i></div>
+                                          <h5 class="description-header" id = "CO-high" ></h5>
+                                          <span class="description-text">HIGH</span>
+                                        </div>
+
+                                        <!-- /.description-block -->
+                                        <div class="description-block">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-down fa-3x" aria-hidden="true"></i></div>
+                                           <h5 class="description-header" id = "CO-low"></h5>
+                                          <span class="description-text">LOW</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                      </div>
+                                    </div>
+                                 </div>
+                            </div>
+                    </div>
+
+
+
+                    
+                    </div>
+                </div>
+
+
+
+                                <!-- O3 graph -->
+                <div class = "container-fluid" id = "O3GraphContainer">
+                <div class = "row">
+                    <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">O<sub>3</sub> data (ppb)</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('O3SubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('O3GraphContainer')"><i class="fa fa-times"></i></button>
+
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="O3SubContainer">
+                                 <div id = "column-wrap">
+                                    <div class="col-md-9">
+                                        <div id="O3Graph" height="120" width = "100%" padding-top = "30px">
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                     <div class="col-md-2">
+                                      <div class="pad box-pane-right box-pane-meteo" style="min-height: 380px">
+                                        <div class="description-block margin-bottom">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-up fa-3x" aria-hidden="true"></i></div>
+                                          <h5 class="description-header" id = "O3-high" ></h5>
+                                          <span class="description-text">HIGH</span>
+                                        </div>
+
+                                        <!-- /.description-block -->
+                                        <div class="description-block">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-down fa-3x" aria-hidden="true"></i></div>
+                                           <h5 class="description-header" id = "O3-low"></h5>
+                                          <span class="description-text">LOW</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                      </div>
+                                    </div>
+                                 </div>
+                            </div>
+                    </div>
+
+
+
+                    
+                    </div>
+                </div>
+
+
+
+
+                                <!-- NO2 graph -->
+                <div class = "container-fluid" id = "NO2GraphContainer">
+                <div class = "row">
+                    <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">NO<sub>2</sub> data (ppb)</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('NO2SubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('NO2GraphContainer')"><i class="fa fa-times"></i></button>
+
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="NO2SubContainer">
+                                 <div id = "column-wrap">
+                                    <div class="col-md-9">
+                                        <div id="NO2Graph" height="120" width = "100%" padding-top = "30px">
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                     <div class="col-md-2">
+                                      <div class="pad box-pane-right box-pane-meteo" style="min-height: 380px">
+                                        <div class="description-block margin-bottom">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-up fa-3x" aria-hidden="true"></i></div>
+                                          <h5 class="description-header" id = "NO2-high" ></h5>
+                                          <span class="description-text">HIGH</span>
+                                        </div>
+
+                                        <!-- /.description-block -->
+                                        <div class="description-block">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-down fa-3x" aria-hidden="true"></i></div>
+                                           <h5 class="description-header" id = "NO2-low"></h5>
+                                          <span class="description-text">LOW</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                      </div>
+                                    </div>
+                                 </div>
+                            </div>
+                    </div>
+
+
+
+                    
+                    </div>
+                </div>
+
+
+                <!-- PM graph -->
+                <div class = "container-fluid" id = "PMGraphContainer">
+                <div class = "row">
+                    <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">PM<sub>2.5</sub> data</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('PMSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('PMGraphContainer')"><i class="fa fa-times"></i></button>
+
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="PMSubContainer">
+                                 <div id = "column-wrap">
+                                    <div class="col-md-9">
+                                        <div id="PMGraph" height="120" width = "100%" padding-top = "30px">
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                     <div class="col-md-2">
+                                      <div class="pad box-pane-right box-pane-meteo" style="min-height: 380px">
+                                        <div class="description-block margin-bottom">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-up fa-3x" aria-hidden="true"></i></div>
+                                          <h5 class="description-header" id = "PM-high" ></h5>
+                                          <span class="description-text">HIGH</span>
+                                        </div>
+
+                                        <!-- /.description-block -->
+                                        <div class="description-block">
+                                          <div class="sparkbar pad" data-color="#fff"><i class="fa fa-chevron-circle-down fa-3x" aria-hidden="true"></i></div>
+                                           <h5 class="description-header" id = "PM-low"></h5>
+                                          <span class="description-text">LOW</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                      </div>
+                                    </div>
+                                 </div>
+                            </div>
+                    </div>
+
+
+
+                    
+                    </div>
+                </div>
+
+
 
 
                 <!-- rssi graph -->
@@ -546,12 +902,13 @@
                                 <h3 class="box-title title">RSSI data (dBm)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('rssiSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('rssiGraphContainer')"><i class="fa fa-times"></i></button>
+
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="rssiSubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9">
                                         <div id = "rssiGraph" height="120" width = "100%" padding-top = "30px">
@@ -602,12 +959,13 @@
                                 <h3 class="box-title title">Accelerometer data (mg)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('accelSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="toggleGraph('accelerometerGraphContainer')"><i class="fa fa-times"></i></button>
+
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="accelSubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9 item">
                                         <div id = "accelerometerGraph" height="120" width = "100%" padding-top = "30px">

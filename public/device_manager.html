@@ -315,13 +315,78 @@
           </div>
         </div>
 
+
+        <div class = "row" id ="gasessettings">
+          <div class="col-md-10">
+              <div class="box box-primary device-box">
+                <div class="box-header with-border">
+                  <h3 class="box-title"><i class="fa fa-industry" aria-hidden="true"></i> Gases Settings </h3>
+                </div>
+                <div class="box-body">
+                    <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-PM" name = "checkbox-PM">
+                        <label for="checkbox-PM">
+                            PM<sub>2.5</sub>
+                        </label>
+                    </div>
+                    <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-SO2" name = "checkbox-SO2">
+                        <label for="checkbox-SO2">
+                            SO<sub>2</sub>
+                        </label>
+                    </div>
+                    <span>
+                      <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-CO" name = "checkbox-CO">
+                        <label for="checkbox-CO">
+                            CO
+                        </label>
+                     </div>
+                    </span>
+                    <span>
+                      <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-O3" name = "checkbox-O3">
+                        <label for="checkbox-O3">
+                            O<sub>3</sub>
+                        </label>
+                     </div>
+                    </span>
+                    <span>
+                      <div class="checkbox checkbox-circle checkbox-primary">
+                        <input type="checkbox" id="checkbox-NO2" name = "checkbox-NO2">
+                        <label for="checkbox-NO2">
+                            NO<sub>2</sub>
+                        </label>
+                     </div>
+                    </span>
+
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <p> Period (in seconds) : </p>
+                        </div>
+                    </div>
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <div class="range-slider slider-section">
+                                <input name = "gases-rangeslider" id = "gases-range-slider" type="text" class="js-range-slider" value="" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button name = "formdata" value ="gases" id = "gasessubmit" onclick = "gasesSubmitClick()" class = "btn btn-default pull-right"> Submit </button>
+                </div>
+              </div>
+          </div>
+        </div>
+
         
         
         <div class = "row" id ="CO2settings">
           <div class="col-md-10">
               <div class="box box-primary device-box">
                 <div class="box-header with-border">
-                  <h3 class="box-title"><i class="fa fa-cloud" aria-hidden="true"></i> CO2 Settings </h3>
+                  <h3 class="box-title"><i class="fa fa-cloud" aria-hidden="true"></i> CO<sub>2</sub> Settings </h3>
                 </div>
                 <div class="box-body">
                     <div class="checkbox checkbox-circle checkbox-primary">
@@ -336,7 +401,7 @@
                             <p> Period (in seconds) : </p>
                         </div>
                     </div>
-                    <div class = "row">
+                    <div class = "row"style="padding-bottom:15px">
                         <div class = "col-md-8">
                             <div class="range-slider slider-section">
                                 <input name = "CO2-rangeslider" id = "CO2-range-slider" type="text" class="js-range-slider" value="" />
@@ -345,6 +410,20 @@
 
                     </div>
 
+                    <div class = "row">
+                        <div class = "col-md-8">
+                            <p> Altitude (in meters) : </p>
+                        </div>
+                    </div>
+                    <div class = "row" style="padding-bottom:15px">
+                        <div class = "col-md-8">
+                            <div class="range-slider slider-section">
+                                <input name = "altitude-rangeslider" id = "altitude-range-slider" type="text" class="js-range-slider" value="" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <button value="Calibrate sensor" onclick="CO2Calibrate()" class="btn btn-default">Calibrate sensor</button><span><br>Calibrating the sensor takes aproximately 10 seconods.<br>Make sure the sensor has been on for 15 min before calibration.</span>
                     <button name = "formdata" value ="CO2" id = "CO2submit" onclick = "CO2SubmitClick()" class = "btn btn-default pull-right"> Submit </button>
                 </div>
               </div>

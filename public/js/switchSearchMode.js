@@ -1,3 +1,7 @@
+/*
+This script is used to toggle the view to chage the search mode between historical mode and bulk mode.
+*/
+
 var currentMode = "";
 
 $('#historicalInputs').hide();
@@ -21,4 +25,12 @@ function switchToggle(mode) {
             break;
         
     }
+}
+
+function toggleGraph(name) {
+	$('#'+name).slideToggle();
+}
+
+function closeGraph(name) {
+	$('#'+name).fadeOut();
 }

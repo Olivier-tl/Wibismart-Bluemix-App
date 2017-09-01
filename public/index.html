@@ -185,12 +185,12 @@
                                 <h3 class="box-title title">Temperature</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('temperatureWidgetSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('temperaturebox')"><i class="fa fa-times"></i></button>
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="temperatureWidgetSubContainer">
                                 <div class = "gauge-section">
                                 <canvas id="temperaturegauge" class="gauge" height="105"></canvas>
                                 <label id = "temperaturevalue" class = "labels"></label>
@@ -205,15 +205,15 @@
                                         <h3 class="box-title title">Humidity</h3>
 
                                         <div class="box-tools pull-right">
-                                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('humidityWidgetSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('humiditybox')"><i class="fa fa-times"></i></button>
                                         </div>
                                     </div>
-                                    <div class="box-body no-padding">
+                                    <div class="box-body no-padding"id="humidityWidgetSubContainer">
                                         <div class = "gauge-section">
                                             <p id = "humidityvalue" class = "gaugevalue"></p>
-                                            <canvas id="humiditygauge" class = "gauge" ></canvas>
+                                            <canvas id="humiditygauge" class = "gauge" height="145"></canvas>
                                        </div>
                                     </div>
                                 </div>
@@ -225,12 +225,12 @@
                                         <h3 class="box-title title">Pressure</h3>
 
                                         <div class="box-tools pull-right">
-                                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('pressureWidgetSubContainer')"><i class="fa fa-minus"></i>
                                             </button>
-                                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                            <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('pressurebox')"><i class="fa fa-times"></i></button>
                                         </div>
                                     </div>
-                                    <div class="box-body no-padding">
+                                    <div class="box-body no-padding"id="pressureWidgetSubContainer">
                                         <div class = "gauge-section">
                                             <canvas id="pressuregauge" class="gauge" height="105"></canvas>
                                             <label id = "pressurevalue" class = "labels">  </label>
@@ -241,21 +241,145 @@
                             </div>
                         </div>
 
+                        <div class="col-md-4" id="UVbox" style="padding-top:15px">
+                                <div class="box box-gray">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title title">UV</h3>
+
+                                        <div class="box-tools pull-right">
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('UVWidgetSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('UVbox')"><i class="fa fa-times"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body no-padding"id="UVWidgetSubContainer">
+                                        <div class = "gauge-section" >
+                                            <p id = "UVvalue" class = "gaugevalue" style="margin-top:70px;"></p>
+                  
+                                            <canvas id="UVgauge" class = "gauge" height="115" ></canvas>
+                                            <label id = "UVlabel" style="text-align:center; position:relative;  width:100%; font-family: 'Josefin Sans', serif; font-size:19px;">MODERATE</label>
+                                       </div>
+                                    </div>
+                                </div>
+                        </div>
+
+                          <div class="col-md-4" id="soundbox" style="padding-top:15px">
+                            <div class="box box-gray">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title title">Sound Level</h3>
+
+                                        <div class="box-tools pull-right">
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('soundWidgetSubContainer')"><i class="fa fa-minus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('soundbox')"><i class="fa fa-times"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body no-padding"id="soundWidgetSubContainer">
+                                        <div class = "gauge-section">
+                                            <canvas id="soundgauge" class="gauge" height="105"></canvas>
+                                            <label id = "soundvalue" class = "labels">  </label>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-md-4" id= "CO2box" style="padding-top:15px">
                             <div class="box box-gray">
                             <div class="box-header with-border">
-                                <h3 class="box-title title">CO2 level</h3>
+                                <h3 class="box-title title">CO<sub>2</sub></h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('CO2WidgetSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('CO2box')"><i class="fa fa-times"></i></button>
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="CO2WidgetSubContainer">
                                 <div class = "gauge-section">
                                 <canvas id="CO2gauge" class="gauge" height="105"></canvas>
                                 <label id = "CO2value" class = "labels"></label>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id="SO2box" style="padding-top:15px">
+                            <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">SO<sub>2</sub></h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('SO2WidgetSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('SO2box')"><i class="fa fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="box-body no-padding"id="SO2WidgetSubContainer">
+                                <div class = "gauge-section">
+                                <canvas id="SO2gauge" class="gauge" height="105"></canvas>
+                                <label id = "SO2value" class = "labels"></label>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id="CObox" style="padding-top:15px">
+                            <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">CO</h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('COWidgetSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('CObox')"><i class="fa fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="box-body no-padding"id="COWidgetSubContainer">
+                                <div class = "gauge-section">
+                                <canvas id="COgauge" class="gauge" height="105"></canvas>
+                                <label id = "COvalue" class = "labels"></label>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id="O3box" style="padding-top:15px">
+                            <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">O<sub>3</sub></h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('O3WidgetSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('O3box')"><i class="fa fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="O3WidgetSubContainer">
+                                <div class = "gauge-section">
+                                <canvas id="O3gauge" class="gauge" height="105"></canvas>
+                                <label id = "O3value" class = "labels"></label>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id="NO2box" style="padding-top:15px">
+                            <div class="box box-gray">
+                            <div class="box-header with-border">
+                                <h3 class="box-title title">NO<sub>2</sub></h3>
+
+                                <div class="box-tools pull-right">
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('NO2WidgetSubContainer')"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('NO2box')"><i class="fa fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="box-body no-padding" id="NO2WidgetSubContainer">
+                                <div class = "gauge-section">
+                                <canvas id="NO2gauge" class="gauge" height="105"></canvas>
+                                <label id = "NO2value" class = "labels"></label>
                                 </div>
                             </div>
                             </div>
@@ -320,12 +444,12 @@
                                 <h3 class="box-title title">Temperature data (°C)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('tempGraphSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('tempGraph')"><i class="fa fa-times"></i></button>
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="tempGraphSubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9">
                                         <div >
@@ -350,12 +474,13 @@
                                 <h3 class="box-title title">Accelerometer data (mg)</h3>
 
                                 <div class="box-tools pull-right">
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="toggleGraph('accelGraphSubContainer')"><i class="fa fa-minus"></i>
                                     </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove" onclick="closeGraph('accelGraph')"><i class="fa fa-times"></i></button>
+
                                 </div>
                             </div>
-                            <div class="box-body no-padding">
+                            <div class="box-body no-padding" id="accelGraphSubContainer">
                                  <div id = "column-wrap">
                                     <div class="col-md-9 item">
                                         <div id = "accelerometer-chart">

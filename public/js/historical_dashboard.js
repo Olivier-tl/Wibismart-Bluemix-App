@@ -1,4 +1,7 @@
-
+/*
+This scrip is handles all the data requests and processig relayed to the server. The server is the place the actual querries to the daya bases are made
+We then display the data using Dygraphs (http://dygraphs.com/)
+*/
 var sockjs_url = '/sensortag';
 var sockjs = new SockJS(sockjs_url);
 
@@ -13,7 +16,14 @@ var accelData = [];
 var temperatureData = [];
 var pressureData = [];
 var humidityData = [];
+var UVData = [];
+var soundData = [];
 var CO2Data = [];
+var SO2Data = [];
+var COData = [];
+var O3Data = [];
+var NO2Data = [];
+var PMData = [];
 var rssiData = [];
 
 //these arrays store a csv formatted string. they are already sorted in the server.
@@ -22,7 +32,14 @@ var batteryCSV = "";
 var temperatureCSV = "";
 var pressureCSV = "";
 var humidityCSV = "";
+var UVCSV = "";
+var soundCSV = "";
 var CO2CSV = "";
+var SO2CSV = "";
+var COCSV = "";
+var O3CSV = "";
+var NO2CSV = "";
+var PMCSV = "";
 var rssiCSV = "";
 var accelCSV = "";
 
@@ -38,7 +55,7 @@ var spinner = null;
 
 $('#csvelem').hide();
 
-/*  this function is calle when the user clicks on the search button.
+/*  this function is called when the user clicks on the search button.
 	it will take all data from all the databases that are within the time frame.
 	the data will then be pushed in the arrays above. to then be displayed on the html page.
 */
@@ -78,7 +95,7 @@ dataBaseChannel.onopen = function() {
 	console.log("Database channel open");
 };
 
-dataBaseChannel.onmessage = function(e) {
+dataBaseChannel.onmessage = function(e) { //this event is triggered when we recieve a message from the server. It could be either in fors of arrays (used to display the min and max values) or in for of csv string to plot the graphs
 	console.log("Response from server received!");
 	var dataObj = JSON.parse(e.data);
 	if (dataObj.message) {
@@ -102,9 +119,16 @@ dataBaseChannel.onmessage = function(e) {
 	&& dataObj.temperatureData.length == 0 
 	&& dataObj.pressureData.length == 0 
 	&& dataObj.humidityData.length == 0 
+	&& dataObj.UVData.length == 0
+	&& dataObj.soundData.length == 0
 	&& dataObj.CO2Data.length == 0 
 	&& dataObj.rssiData.length == 0
 	&& dataObj.accelData.length == 0
+	&& dataObj.SO2Data.length == 0
+	&& dataObj.COData.length == 0
+	&& dataObj.O3Data.length == 0
+	&& dataObj.NO2Data.length == 0
+	&& dataObj.PMData.length == 0
 	&& dataObj.csv) {
 		renderMessage("The server has responded but the data you are looking for does not exist. Ckeck if your device ID is correct.")
 	}
@@ -114,7 +138,14 @@ dataBaseChannel.onmessage = function(e) {
 		temperatureData = dataObj.temperatureData;
 		pressureData = dataObj.pressureData;
 		humidityData = dataObj.humidityData;
+		UVData = dataObj.UVData;
+		soundData = dataObj.soundData;
 		CO2Data = dataObj.CO2Data;
+		SO2Data = dataObj.SO2Data;
+		COData = dataObj.COData;
+		O3Data = dataObj.O3Data;
+		NO2Data = dataObj.NO2Data;
+		PMData = dataObj.PMData;
 		accelData = dataObj.accelData;
 		rssiData = dataObj.rssiData;
 
@@ -181,6 +212,16 @@ function setMinMax() {//this function gets the average min max of all the charac
 	$("#humidity-high").html(tempArr[1]);
 	$("#humidity-low").html(tempArr[0]);
 
+	var tempArr = MinMax(UVData, "");
+
+	$("#UV-high").html(tempArr[1]);
+	$("#UV-low").html(tempArr[0]);
+
+	var tempArr = MinMax(soundData, " dB");
+
+	$("#sound-high").html(tempArr[1]);
+	$("#sound-low").html(tempArr[0]);
+
 	var tempArr = MinMax(batteryData, " %");
 
 	$("#battery-high").html(tempArr[1]);
@@ -191,10 +232,35 @@ function setMinMax() {//this function gets the average min max of all the charac
 	$("#light-high").html(tempArr[1]);
 	$("#light-low").html(tempArr[0]);
 
-	var tempArr = MinMax(CO2Data, "ppm");
+	var tempArr = MinMax(CO2Data, " ppm");
 
-	$("CO2-high").html(tempArr[1]);
-	$("CO2-low").html(tempArr[0]);
+	$("#CO2-high").html(tempArr[1]);
+	$("#CO2-low").html(tempArr[0]);
+
+	var tempArr = MinMax(SO2Data, " ppm");
+
+	$("#SO2-high").html(tempArr[1]);
+	$("#SO2-low").html(tempArr[0]);
+
+	var tempArr = MinMax(COData, " ppm");
+
+	$("#CO-high").html(tempArr[1]);
+	$("#CO-low").html(tempArr[0]);
+
+	var tempArr = MinMax(O3Data, " ppm");
+
+	$("#O3-high").html(tempArr[1]);
+	$("#O3-low").html(tempArr[0]);
+
+	var tempArr = MinMax(NO2Data, " ppm");
+
+	$("#NO2-high").html(tempArr[1]);
+	$("#NO2-low").html(tempArr[0]);
+
+	var tempArr = MinMax(PMData, "");
+
+	$("#PM-high").html(tempArr[1]);
+	$("#PM-low").html(tempArr[0]);
 
 	var tempArr = MinMax(rssiData, " dbm");
 
@@ -205,18 +271,33 @@ function setMinMax() {//this function gets the average min max of all the charac
 
 //this function creates graphs with the packege Dygraphs and puts them into the html elements
 function renderGraphs() {
+	console.log("rendedring graphs");
 	$('#temperatureGraph').hide();
 	document.getElementById("temperatureGraph").style.visibility = "hidden";
 	$('#pressureGraph').hide();
 	document.getElementById("pressureGraph").style.visibility = "hidden";
 	$('#humidityGraph').hide();
 	document.getElementById("humidityGraph").style.visibility = "hidden";
+	$('#UVGraph').hide();
+	document.getElementById("UVGraph").style.visibility = "hidden";
+	$('#soundGraph').hide();
+	document.getElementById("soundGraph").style.visibility = "hidden";
 	$('#batteryGraph').hide();
 	document.getElementById("batteryGraph").style.visibility = "hidden";
 	$('#lightLevelGraph').hide();
 	document.getElementById("lightLevelGraph").style.visibility = "hidden";
 	$('#CO2Graph').hide();
 	document.getElementById("CO2Graph").style.visibility = "hidden";
+	$('#SO2Graph').hide();
+	document.getElementById("CO2Graph").style.visibility = "hidden";
+	$('#COGraph').hide();
+	document.getElementById("CO2Graph").style.visibility = "hidden";
+	$('#O3Graph').hide();
+	document.getElementById("CO2Graph").style.visibility = "hidden";
+	$('#NO2Graph').hide();
+	document.getElementById("CO2Graph").style.visibility = "hidden";
+	$('#PMGraph').hide();
+	document.getElementById("PMGraph").style.visibility = "hidden";
 	$('#rssiGraph').hide();
 	document.getElementById("rssiGraph").style.visibility = "hidden";
 	$('#accelerometerGraph').hide();
@@ -231,9 +312,10 @@ function renderGraphs() {
 		$('#temperatureGraph').fadeIn(2000);
 		temperatureGraph = new Dygraph(document.getElementById("temperatureGraph") , temperatureCSV, {
 			connectSeparatedPoints: true,
-			ylabel: "Temperature (°C)"
+			ylabel: "Temperature (°C)",
+			fillGraph: true
 		});
-		document.getElementById("temperatureGraph").style.width = "100%"
+		document.getElementById("temperatureGraph").style.width = "100%";
 	}
 	else {
 		$('#temperatureGraphContainer').slideUp();
@@ -247,9 +329,10 @@ function renderGraphs() {
 		document.getElementById("pressureGraph").style.width = "100%"
 		pressureGraph = new Dygraph(document.getElementById("pressureGraph") , pressureCSV, {
 			connectSeparatedPoints: true,
-			ylabel: "Pressure (mbar)"
+			ylabel: "Pressure (mbar)",
+			fillGraph: true
 		});
-		document.getElementById("pressureGraph").style.width = "100%"
+		document.getElementById("pressureGraph").style.width = "100%";
 	}
 	else {
 		$('#pressureGraphContainer').slideUp();
@@ -263,12 +346,47 @@ function renderGraphs() {
 		document.getElementById("humidityGraph").style.width = "100%"
 		humidityGraph = new Dygraph(document.getElementById("humidityGraph"), humidityCSV, {
 			connectSeparatedPoints: true,
-			ylabel: "Humidity (%)"
+			ylabel: "Humidity (%)",
+			fillGraph: true
 		});
-		document.getElementById("humidityGraph").style.width = "100%"
+		document.getElementById("humidityGraph").style.width = "100%";
 	}
 	else {
 		$('#humidityGraphContainer').slideUp();
+	}
+
+	if(UVCSV.length > 0) {
+		$('#UVGraphContainer').slideDown();
+		document.getElementById("UVGraph").style.visibility = "visible";
+		$('#UVGraph').fadeIn(2000);
+		UVGraph = new Dygraph(document.getElementById("UVGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
+		document.getElementById("UVGraph").style.width = "100%"
+		UVGraph = new Dygraph(document.getElementById("UVGraph"), UVCSV, {
+			connectSeparatedPoints: true,
+			ylabel: "UV index",
+			fillGraph: true
+		});
+		document.getElementById("UVGraph").style.width = "100%";
+	}
+	else {
+		$('#UVGraphContainer').slideUp();
+	}
+
+	if(soundCSV.length > 0) {
+		$('#soundGraphContainer').slideDown();
+		document.getElementById("soundGraph").style.visibility = "visible";
+		$('#soundGraph').fadeIn(2000);
+		soundGraph = new Dygraph(document.getElementById("soundGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
+		document.getElementById("soundGraph").style.width = "100%"
+		soundGraph = new Dygraph(document.getElementById("soundGraph"), soundCSV, {
+			connectSeparatedPoints: true,
+			ylabel: "Sound Level",
+			fillGraph: true
+		});
+		document.getElementById("soundGraph").style.width = "100%";
+	}
+	else {
+		$('#soundGraphContainer').slideUp();
 	}
 
 	if(batteryCSV.length > 0) {
@@ -279,14 +397,15 @@ function renderGraphs() {
 		document.getElementById("batteryGraph").style.width = "100%"
 		batteryGraph = new Dygraph(document.getElementById("batteryGraph") , batteryCSV, {
 			ylabel: "Battery level (%)",
-			connectSeparatedPoints: true
+			connectSeparatedPoints: true,
+			fillGraph: true,
+			valueRange: [0, 110]
 		});
-		document.getElementById("batteryGraph").style.width = "100%"
+		document.getElementById("batteryGraph").style.width = "100%";
 	}
 	else {
 		$('#batteryGraphContainer').slideUp();
 	}
-
 	if(lightCSV.length > 0) {
 		$('#lightLevelGraphContainer').slideDown();
 		document.getElementById("lightLevelGraph").style.visibility = "visible";
@@ -295,9 +414,10 @@ function renderGraphs() {
 		document.getElementById("lightLevelGraph").style.width = "100%"
 		lightLevelGraph = new Dygraph(document.getElementById("lightLevelGraph"), lightCSV, {
 			connectSeparatedPoints: true,
-			ylabel: "Light level (mV)"
+			ylabel: "Light level (mV)",
+			fillGraph: true
 		});
-		document.getElementById("lightLevelGraph").style.width = "100%"
+		document.getElementById("lightLevelGraph").style.width = "100%";
 	}
 	else {
 		$('#lightLevelGraphContainer').slideUp();
@@ -311,12 +431,98 @@ function renderGraphs() {
 		document.getElementById("CO2Graph").style.width = "100%"
 		CO2Graph = new Dygraph(document.getElementById("CO2Graph"), CO2CSV, {
 			connectSeparatedPoints: true,
-			ylabel: "CO2 Level (ppm)"
+			ylabel: "CO2 Level (ppm)",
+			fillGraph: true
 		});
-		document.getElementById("CO2Graph").style.width = "100%"
+		document.getElementById("CO2Graph").style.width = "100%";
 	}
 	else {
 		$('#CO2GraphContainer').slideUp();
+	}
+
+	if(SO2CSV.length > 0) {
+		$('#SO2GraphContainer').slideDown();
+		document.getElementById("SO2Graph").style.visibility = "visible";
+		$('#SO2Graph').fadeIn(2000);
+		SO2Graph = new Dygraph(document.getElementById("SO2Graph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
+		document.getElementById("SO2Graph").style.width = "100%"
+		SO2Graph = new Dygraph(document.getElementById("SO2Graph"), SO2CSV, {
+			connectSeparatedPoints: true,
+			ylabel: "SO2 Level (ppm)",
+			fillGraph: true
+		});
+		document.getElementById("SO2Graph").style.width = "100%";
+	}
+	else {
+		$('#SO2GraphContainer').slideUp();
+	}
+
+	if(COCSV.length > 0) {
+		$('#COGraphContainer').slideDown();
+		document.getElementById("COGraph").style.visibility = "visible";
+		$('#COGraph').fadeIn(2000);
+		COGraph = new Dygraph(document.getElementById("COGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
+		document.getElementById("COGraph").style.width = "100%"
+		COGraph = new Dygraph(document.getElementById("COGraph"), COCSV, {
+			connectSeparatedPoints: true,
+			ylabel: "CO Level (ppm)",
+			fillGraph: true
+		});
+		document.getElementById("COGraph").style.width = "100%";
+	}
+	else {
+		$('#COGraphContainer').slideUp();
+	}
+
+	if(O3CSV.length > 0) {
+		$('#O3GraphContainer').slideDown();
+		document.getElementById("O3Graph").style.visibility = "visible";
+		$('#O3Graph').fadeIn(2000);
+		O3Graph = new Dygraph(document.getElementById("O3Graph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
+		document.getElementById("O3Graph").style.width = "100%"
+		O3Graph = new Dygraph(document.getElementById("O3Graph"), O3CSV, {
+			connectSeparatedPoints: true,
+			ylabel: "O3 Level (ppm)",
+			fillGraph: true
+		});
+		document.getElementById("O3Graph").style.width = "100%";
+	}
+	else {
+		$('#O3GraphContainer').slideUp();
+	}
+
+	if(NO2CSV.length > 0) {
+		$('#NO2GraphContainer').slideDown();
+		document.getElementById("NO2Graph").style.visibility = "visible";
+		$('#NO2Graph').fadeIn(2000);
+		NO2Graph = new Dygraph(document.getElementById("NO2Graph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
+		document.getElementById("NO2Graph").style.width = "100%"
+		NO2Graph = new Dygraph(document.getElementById("NO2Graph"), NO2CSV, {
+			connectSeparatedPoints: true,
+			ylabel: "NO2 Level (ppm)",
+			fillGraph: true
+		});
+		document.getElementById("NO2Graph").style.width = "100%";
+	}
+	else {
+		$('#NO2GraphContainer').slideUp();
+	}
+
+	if(PMCSV.length > 0) {
+		$('#PMGraphContainer').slideDown();
+		document.getElementById("PMGraph").style.visibility = "visible";
+		$('#PMGraph').fadeIn(2000);
+		PMGraph = new Dygraph(document.getElementById("PMGraph"), [0], {}); //for some reason when this line is here, the graphs correctly have 100% width
+		document.getElementById("PMGraph").style.width = "100%"
+		PMGraph = new Dygraph(document.getElementById("PMGraph"), PMCSV, {
+			connectSeparatedPoints: true,
+			ylabel: "PM Index",
+			fillGraph: true
+		});
+		document.getElementById("PMGraph").style.width = "100%";
+	}
+	else {
+		$('#PMGraphContainer').slideUp();
 	}
 		
 
@@ -331,7 +537,7 @@ function renderGraphs() {
 			ylabel: "Rssi (dbm)",
 			valueRange: [-115, -30]
 		});
-		document.getElementById("rssiGraph").style.width = "100%"
+		document.getElementById("rssiGraph").style.width = "100%";
 	}
 	else {
 		$('#rssiGrapgContainer').slideUp();
@@ -347,7 +553,7 @@ function renderGraphs() {
 			ylabel: "Acceleration (mg)",
 			connectSeparatedPoints: true
 		});
-		document.getElementById("accelerometerGraph").style.width = "100%"
+		document.getElementById("accelerometerGraph").style.width = "100%";
 	}
 	else {
 		$('#accelerometerGraphContainer').slideUp();
@@ -355,7 +561,7 @@ function renderGraphs() {
 
 }// end of renderGraphs
 
-function renderCSV(dataObj) { // this fills the cvs variables and creates the appropriate buttons in the dropdown after deleting the old ones
+function renderCSV(dataObj) { // this fills the cvs variables and creates the appropriate buttons in the dropdown after deleting the old ones to be able to display the csv strings in the text box
 	
 	var CSVdropDown = document.getElementById("CSVDropDown");
 	while(CSVdropDown.firstChild) {
@@ -398,16 +604,72 @@ function renderCSV(dataObj) { // this fills the cvs variables and creates the ap
 	if (humidityCSV != "") {
 		var humidityCSVelem = document.createElement("li");
 		humidityCSVelem.setAttribute("onclick", "dataToggle('humidity')");
-		humidityCSVelem.appendChild(document.createTextNode("Humidity"));
+		humidityCSVelem.appendChild(document.createTextNode("humidity"));
 		CSVdropDown.appendChild(humidityCSVelem);
+	}
+
+	UVCSV = dataObj.UVData;
+	if (UVCSV != "") {
+		var UVCSVelem = document.createElement("li");
+		UVCSVelem.setAttribute("onclick", "dataToggle('UV')");
+		UVCSVelem.appendChild(document.createTextNode("UV"));
+		CSVdropDown.appendChild(UVCSVelem);
+	}
+
+	soundCSV = dataObj.soundData;
+	if (soundCSV != "") {
+		var soundCSVelem = document.createElement("li");
+		soundCSVelem.setAttribute("onclick", "dataToggle('sound')");
+		soundCSVelem.appendChild(document.createTextNode("sound"));
+		CSVdropDown.appendChild(soundCSVelem);
 	}
 
 	CO2CSV = dataObj.CO2Data;
 	if (CO2CSV != "") {
 		var CO2CSVelem = document.createElement("li");
 		CO2CSVelem.setAttribute("onclick", "dataToggle('CO2')");
-		CO2CSVelem.appendChild(document.createTextNode("CO2"));
+		CO2CSVelem.innerHTML = "CO<sub>2</sub>";
 		CSVdropDown.appendChild(CO2CSVelem);
+	}
+
+	SO2CSV = dataObj.SO2Data;
+	if (SO2CSV != "") {
+		var SO2CSVelem = document.createElement("li");
+		SO2CSVelem.setAttribute("onclick", "dataToggle('SO2')");
+		SO2CSVelem.innerHTML = "SO<sub>2</sub>";
+		CSVdropDown.appendChild(SO2CSVelem);
+	}
+
+	COCSV = dataObj.COData;
+	if (COCSV != "") {
+		var COCSVelem = document.createElement("li");
+		COCSVelem.setAttribute("onclick", "dataToggle('CO')");
+		COCSVelem.appendChild(document.createTextNode("CO"));
+		CSVdropDown.appendChild(COCSVelem);
+	}
+
+	O3CSV = dataObj.O3Data;
+	if (O3CSV != "") {
+		var O3CSVelem = document.createElement("li");
+		O3CSVelem.setAttribute("onclick", "dataToggle('O3')");
+		O3CSVelem.innerHTML = "O<sub>3</sub>";
+		CSVdropDown.appendChild(O3CSVelem);
+	}
+
+	NO2CSV = dataObj.NO2Data;
+	if (NO2CSV != "") {
+		var NO2CSVelem = document.createElement("li");
+		NO2CSVelem.setAttribute("onclick", "dataToggle('NO2')");
+		NO2CSVelem.innerHTML = "NO<sub>2</sub>";
+		CSVdropDown.appendChild(NO2CSVelem);
+	}
+
+	PMCSV = dataObj.PMData;
+	if (PMCSV != "") {
+		var PMCSVelem = document.createElement("li");
+		PMCSVelem.setAttribute("onclick", "dataToggle('PM')");
+		PMCSVelem.innerHTML = "PM<sub>2.5</sub>";
+		CSVdropDown.appendChild(PMCSVelem);
 	}
 
 	rssiCSV = dataObj.rssiData;
@@ -453,6 +715,30 @@ function dataToggle(type) { // this changes the content of the csv field
 		case 'humidity':
 			field.value = humidityCSV;
 			break;
+		case 'UV':
+			field.value = UVCSV;
+			break;
+		case 'sound':
+			field.value = soundCSV;
+			break;
+		case 'CO2':
+			field.value = CO2CSV;
+			break;
+		case 'SO2':
+			field.value = SO2CSV;
+			break;
+		case 'CO':
+			field.value = COCSV;
+			break;
+		case 'O3':
+			field.value = O3CSV;
+			break;
+		case 'NO2':
+			field.value = NO2CSV;
+			break;
+		case 'PM':
+			field.value = PMCSV;
+			break;
 		case 'rssi':
 			field.value = rssiCSV;
 			break;
@@ -462,7 +748,7 @@ function dataToggle(type) { // this changes the content of the csv field
 }
 
 
-function renderMessage(m) {// tis function is used to append any message to the message list and they will dissapear after 5 sec
+function renderMessage(m) {// this function is used to append any message to the message list and they will dissapear after 5 sec
 	var message = document.createElement('li');
 	message.appendChild(document.createTextNode(m));
 	var container = document.getElementById('messages');

@@ -12,6 +12,7 @@ var Cloudant = require('cloudant');
 var Client = require('ibmiotf');
 const toCSV = require('array-to-csv');
 
+//credentials to connect to the watson IoT platform.
 var appClientConfig = {
     "org" : "4rxa4d",
     "id": Date.now().toString(),
@@ -73,12 +74,15 @@ function start(deviceId, apiKey, apiToken, mqttHost, mqttPort) {
     process.exit(1);
   });
 
+//web socket channel variables
   var service = sockjs.createServer(sockjs_opts);
   var multiplexer = new websocket_multiplex.MultiplexServer(service);
   var accelChannel = multiplexer.registerChannel('accel');
   var airChannel = multiplexer.registerChannel('air');
   var lightChannel = multiplexer.registerChannel('health');
   var CO2Channel = multiplexer.registerChannel('CO2');
+  var soundChannel = multiplexer.registerChannel('sound');
+  var gasesChannel = multiplexer.registerChannel('gases');
   var batteryChannel = multiplexer.registerChannel('battery');
   var locationChannel = multiplexer.registerChannel('location');
   var dataBaseChannel = multiplexer.registerChannel('dataBase');
@@ -106,6 +110,7 @@ function start(deviceId, apiKey, apiToken, mqttHost, mqttPort) {
     }
   });
 
+//This function is called lower here when the the websocket opens so it subscribes to mqtt topics
   function onConnection(topicPath) {
     return function(conn) {
       var mqttTopic;
@@ -159,7 +164,7 @@ function start(deviceId, apiKey, apiToken, mqttHost, mqttPort) {
     };
   };
 
-
+//this function is called on opening of a websocket for data is opened from the historical dashboard
 function dataRequest() {
   return function(conn) {
     console.log("Data channel connected");
@@ -177,7 +182,14 @@ function dataRequest() {
       var temperatureData = [];
       var pressureData = [];
       var humidityData = [];
+      var UVData = [];
+      var soundData = [];
       var CO2Data = [];
+      var SO2Data = [];
+      var COData = [];
+      var O3Data = [];
+      var NO2Data = [];
+      var PMData = [];
       var rssiData = [];
       var dbList = [];
       var requestObj = JSON.parse(data);
@@ -217,13 +229,13 @@ function dataRequest() {
       });//end of list
 
       function querryAll(thisUuid) {
-        for(var j = 0 ; j < 5 && j < dbList.length ; j++) {
+        for(var j = 0 ; j < 5 && j < dbList.length ; j++) { // here we only itterate 5 times because Cloudant only allows 5 querries pers second
           tempInstance = dbList[j];
           querry(tempInstance, dbList.length, j+1, thisUuid);
         }
       }
 
-      function querry(tempInstance, dblength, index, thisUuid) {
+      function querry(tempInstance, dblength, index, thisUuid) { //this function querries a specific database
         console.log('querry for ' + thisUuid +" device "+(deviceIndex+1)+ "/"+ totalDevices + " database " + index + "/" + dblength);
         conn.write(JSON.stringify({message:"Querying data base for " + dbList[index-1].config.db.split('_')[3] + " for device " + thisUuid + ". (" + index + "/" + dblength + " databases)"}));
         //console.log("Querying data base for " + dbList[index-1].config.db.split('_')[3] + " for device " + thisUuid + ". (" + index + "/" + dblength + " database(s))")
@@ -239,9 +251,7 @@ function dataRequest() {
 
               ],
               "sort": [
-                {
-                "_id": "asc"
-                }
+                
               ]
               }, function(err, result) { //results represents the data comming back from the database.
                 if (err) {
@@ -265,6 +275,59 @@ function dataRequest() {
                       extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
 
                       CO2Data.push(tempDataSet);
+                      break;
+                    case 'sound':
+                      tempDataSet.push(result.docs[i].timestamp);
+                      extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
+                      tempDataSet.push(result.docs[i].data.d.soundLevel);
+                      extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
+
+                      soundData.push(tempDataSet);
+                      break;
+                    case 'gases':
+                      tempDataSet.push(result.docs[i].timestamp);
+                      extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
+                      tempDataSet.push(result.docs[i].data.d.SO2);
+                      extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
+
+                      SO2Data.push(tempDataSet);
+
+                      tempDataSet = [];
+
+                      tempDataSet.push(result.docs[i].timestamp);
+                      extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
+                      tempDataSet.push(result.docs[i].data.d.CO);
+                      extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
+
+                      COData.push(tempDataSet);
+
+                      tempDataSet = [];
+
+                      tempDataSet.push(result.docs[i].timestamp);
+                      extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
+                      tempDataSet.push(result.docs[i].data.d.O3);
+                      extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
+
+                      O3Data.push(tempDataSet);
+
+                      tempDataSet = [];
+
+                      tempDataSet.push(result.docs[i].timestamp);
+                      extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
+                      tempDataSet.push(result.docs[i].data.d.NO2);
+                      extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
+
+                      NO2Data.push(tempDataSet);
+
+                      tempDataSet = [];
+
+                      tempDataSet.push(result.docs[i].timestamp);
+                      extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
+                      tempDataSet.push(result.docs[i].data.d.PM);
+                      extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
+
+                      PMData.push(tempDataSet);
+                      break;
                     case 'battery':
                       tempDataSet.push(result.docs[i].timestamp);
                       extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
@@ -314,6 +377,17 @@ function dataRequest() {
                       extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
                       
                       humidityData.push(tempDataSet);
+
+                      if(result.docs[i].data.d.UV != null) {
+                        tempDataSet = [];
+
+                        tempDataSet.push(result.docs[i].timestamp);
+                        extraPointsBefore(tempDataSet, uuidIndex[thisUuid], 1);
+                        tempDataSet.push(result.docs[i].data.d.UV);
+                        extraPointsAfter(tempDataSet, uuidIndex[thisUuid], 1);
+                        
+                        UVData.push(tempDataSet);
+                      }
                       break;
                     default:
                       break;
@@ -329,13 +403,20 @@ function dataRequest() {
                     chartData.temperatureData = temperatureData;
                     chartData.pressureData = pressureData;
                     chartData.humidityData = humidityData;
+                    chartData.UVData = UVData;
+                    chartData.soundData = soundData;
                     chartData.CO2Data = CO2Data;
+                    chartData.SO2Data = SO2Data;
+                    chartData.COData = COData;
+                    chartData.O3Data = O3Data;
+                    chartData.NO2Data = NO2Data;
+                    chartData.PMData = PMData;
                     chartData.accelData = accelData;
                     chartData.rssiData = rssiData;
                     clearInterval(clientUpdate);
                     conn.write(JSON.stringify({update:"done"}));
                     sendDataBack(conn, chartData); // this is where the data for the graphs is sent back
-                    if (lightData.length != 0 || batteryData != 0 || temperatureData != 0 || pressureData != 0 || humidityData != 0 || CO2Data != 0 || rssiData != 0 || accelData != 0 ) {
+                    if (lightData.length != 0 || batteryData.length != 0 || temperatureData.length != 0 || pressureData.length != 0 || humidityData.length != 0 || CO2Data.length != 0 || SO2Data.length != 0 || COData.length != 0 || O3Data.length != 0 || NO2Data.length != 0 || rssiData.length != 0 || accelData.length != 0 ) {
                       conn.write(JSON.stringify({message:"Data recieved. Now formatting CSV data."}));
                     }
                     sendCSVBack(conn, chartData); // this is where the csv data is formatted then sent back.
@@ -381,6 +462,7 @@ function dataRequest() {
   }; //end of returning function
 };
 
+//This function is called when the historical dashboard is loaded and the bulk data channel is opened.
 function onBulkDataConnection() {
   return function(conn) {
     console.log("Data channel connected");
@@ -388,7 +470,7 @@ function onBulkDataConnection() {
         console.log("Data channel close");
     });
 
-    conn.on('data', function(data) {
+    conn.on('data', function(data) { //This event is trigered when a request for data arrives from a browser.
       var requestObj = JSON.parse(data);
       var targetName = null;
       var out = {};
@@ -452,7 +534,7 @@ function onBulkDataConnection() {
                 }
               }
               
-              for(i in out) {// we go throughh each deviceData
+              for(i in out) {// we go through each deviceData
                 var thisDeviceData = out[i];
                 for(j in thisDeviceData) { // we go through each characteristic
                   var thisChar = thisDeviceData[j];
@@ -481,6 +563,7 @@ function onBulkDataConnection() {
                 removeAllFirstEntries(thisDevice);
                 allCharToCSV(thisDevice);
               }
+            
               clearInterval(clientUpdate);
               conn.write(JSON.stringify({update:"done"}));
               console.log("Sending bulk data back...");
@@ -492,12 +575,19 @@ function onBulkDataConnection() {
   };
 };
 
-function DeviceDataSet() {
+function DeviceDataSet() { //This is a helper object for the bulk data
   this.accelData = [];
   this.temperatureData = [];
   this.pressureData = [];
   this.humidityData = [];
+  this.UVData = [];
+  this.soundData = [];
   this.CO2Data = [];
+  this.SO2Data = [];
+  this.COData = [];
+  this.O3Data = [];
+  this.NO2Data = [];
+  this.PMData = [];
   this.lightData = [];
   this.batteryData = [];
   this.rssiData = [];
@@ -522,6 +612,19 @@ DeviceDataSet.prototype.setReading = function(dataPoint) {
       tempDataSet.push(dataPoint.timestamp);
       tempDataSet.push(dataPoint.data.d.pressure);
       this.pressureData.push(tempDataSet);
+      
+      if(dataPoint.data.d.UV != null) {
+        tempDataSet = [];
+
+        tempDataSet.push(dataPoint.timestamp);
+        tempDataSet.push(dataPoint.data.d.UV);
+        this.UVData.push(tempDataSet);
+      }
+      break;
+    case 'sound':
+      tempDataSet.push(dataPoint.data.d.soundLevel);
+
+      this.soundData.push(tempDataSet);
       break;
     case 'light':
       tempDataSet.push(dataPoint.data.d.light);
@@ -532,6 +635,32 @@ DeviceDataSet.prototype.setReading = function(dataPoint) {
       tempDataSet.push(dataPoint.data.d.CO2);
 
       this.CO2Data.push(tempDataSet);
+      break;
+    case 'gases':
+      tempDataSet.push(dataPoint.data.d.SO2);
+
+      this.SO2Data.push(tempDataSet);
+      tempDataSet = [];
+
+      tempDataSet.push(dataPoint.timestamp);
+      tempDataSet.push(dataPoint.data.d.CO);
+
+      this.COData.push(tempDataSet);
+      tempDataSet = [];
+
+      tempDataSet.push(dataPoint.timestamp);
+      tempDataSet.push(dataPoint.data.d.O3);
+      this.O3Data.push(tempDataSet);
+      tempDataSet = [];
+
+      tempDataSet.push(dataPoint.timestamp);
+      tempDataSet.push(dataPoint.data.d.NO2);
+      this.NO2Data.push(tempDataSet);
+      tempDataSet = [];
+
+      tempDataSet.push(dataPoint.timestamp);
+      tempDataSet.push(dataPoint.data.d.PM);
+      this.PMData.push(tempDataSet);
       break;
     case 'accel':
       tempDataSet.push(dataPoint.data.d.x);
@@ -549,6 +678,7 @@ DeviceDataSet.prototype.setReading = function(dataPoint) {
       tempDataSet.push(dataPoint.data.d.rssi);
 
       this.rssiData.push(tempDataSet);
+      break;
     default: 
       break;
   }
@@ -582,32 +712,49 @@ function compareDate(inputDate1, inputDate2) {
 	return -1;
 }
 
-function sortByDate(lightData, batteryData, temperatureData, pressureData, humidityData, CO2Data, accelData, rssiData) { // this fnction is used to sort the dates when the clients asks for csv
+function sortByDate(lightData, batteryData, temperatureData, pressureData, humidityData, UVData, soundData, CO2Data, SO2Data, COData, O3Data, NO2Data, PMData, accelData, rssiData) { // this fnction is used to sort the dates when the clients asks for csv
   lightData.sort(compareFunction);
   batteryData.sort(compareFunction);
   accelData.sort(compareFunction);
   temperatureData.sort(compareFunction);
   pressureData.sort(compareFunction);
   humidityData.sort(compareFunction);
+  UVData.sort(compareFunction);
+  soundData.sort(compareFunction);
   CO2Data.sort(compareFunction);
+  SO2Data.sort(compareFunction);
+  COData.sort(compareFunction);
+  O3Data.sort(compareFunction);
+  NO2Data.sort(compareFunction);
+  PMData.sort(compareFunction);
   rssiData.sort(compareFunction);
 }
 
+//This function converts the arrays containing the data into CSV formatted strings.
 function allCharToCSV(chartData) {
   chartData.lightData = writeToCSV(chartData.lightData, "light");
   chartData.batteryData = writeToCSV(chartData.batteryData, "battery");
   chartData.temperatureData = writeToCSV(chartData.temperatureData, "temperature");
   chartData.pressureData = writeToCSV(chartData.pressureData, "pressure");
   chartData.humidityData = writeToCSV(chartData.humidityData, "humidity");
+  chartData.UVData = writeToCSV(chartData.UVData, "UV");
+  chartData.soundData = writeToCSV(chartData.soundData, "soundLevel");
   chartData.CO2Data = writeToCSV(chartData.CO2Data, "CO2");
+  chartData.SO2Data = writeToCSV(chartData.SO2Data, "SO2");
+  chartData.COData = writeToCSV(chartData.COData, "CO");
+  chartData.O3Data = writeToCSV(chartData.O3Data, "O3");
+  chartData.NO2Data = writeToCSV(chartData.NO2Data, "NO2");
+  chartData.PMData = writeToCSV(chartData.PMData, "PM2.5");
   chartData.accelData = writeToCSV(chartData.accelData, ["x", "y", "z"]);
   chartData.rssiData = writeToCSV(chartData.rssiData, "rssi");
 }
 
+//This function is used to sort the arrays
 var compareFunction = function(a, b) {
   return a[0].getTime() - b[0].getTime();
 }
 
+//This function takes as input a JSON formatted datestring and parses it into a Date object
 function parseTime(input) {
   var timestamp = input.split('T');
   var thisdate = timestamp[0].split('-');
@@ -621,6 +768,7 @@ function parseTime(input) {
 
 //this function takes as an input an 2D array and the name of the data to write it into a csv string
 function writeToCSV(data, name) {
+  console.log("writing CSV for " + name + " of length " + data.length);
   if (data.length == 0) {
     return "";
   }
@@ -639,7 +787,7 @@ function writeToCSV(data, name) {
     var labels = ["Timestamp"];
     for (var i = 1; i < 1 + (data[0].length-1)/name.length; i++) {
       for(var j = 0 ; j < name.length ; j++) {
-        if(data[0].length == 4) {
+        if((data[0].length-1)/name.length == 1) {
           labels.push(name[j]);
         }
         else {
@@ -681,7 +829,7 @@ function sendCSVBack(conn, chartData) {
       }
     }
   }
-  sortByDate(chartData.lightData, chartData.batteryData, chartData.temperatureData, chartData.pressureData, chartData.humidityData, chartData.CO2Data, chartData.accelData, chartData.rssiData);
+  sortByDate(chartData.lightData, chartData.batteryData, chartData.temperatureData, chartData.pressureData, chartData.humidityData, chartData.UVData, chartData.soundData, chartData.CO2Data, chartData.SO2Data, chartData.COData, chartData.O3Data, chartData.NO2Data, chartData.PMData, chartData.accelData, chartData.rssiData);
   removeAllFirstEntries(chartData);
 
   allCharToCSV(chartData);
@@ -691,7 +839,7 @@ function sendCSVBack(conn, chartData) {
 }
 
 
-
+//This function is called on opening of a command channel web socket
 function commandChannelConnected(topicPath) {
   return function(conn) {
         var mqttTopic;
@@ -747,11 +895,14 @@ accelChannel.onmessage = function(e) {
   cosome.log(e)
 }
 
+//here is where all the functions are called upon opening of websockets
   accelChannel.on('connection', onConnection('/evt/accel/fmt/json'));
   airChannel.on('connection', onConnection('/evt/air/fmt/json'));
   lightChannel.on('connection', onConnection('/evt/health/fmt/json'));
   batteryChannel.on('connection', onConnection('/evt/battery/fmt/json'));
   CO2Channel.on('connection', onConnection('/evt/CO2/fmt/json'));
+  soundChannel.on('connection', onConnection('/evt/sound/fmt/json'));
+  gasesChannel.on('connection', onConnection('/evt/gases/fmt/json'));
   locationChannel.on('connection', onConnection('/evt/location/fmt/json'));
   dataBaseChannel.on('connection', dataRequest());
   bulkDataChannel.on('connection', onBulkDataConnection());
@@ -780,7 +931,7 @@ accelChannel.onmessage = function(e) {
 
 
 
-
+//These are the cloudant credentials to connect to cloudant
 var me = '6f99adac-7671-4e45-9a80-0ba7638a5eb5-bluemix'; // Set this to your own account
 var password = 'dcb7a77744a9d8691e8cc098fe7ba645bb9311fe0311528c86ec21cc5ff8a066';
 

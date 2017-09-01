@@ -1,16 +1,22 @@
-
+/*
+This script handles all stream of data comming from the server which is subscribed to mqtt topics that envioros are publishing
+*/
 var sockjs_url = '/sensortag';
 var sockjs = new SockJS(sockjs_url);
 
 var multiplexer = new WebSocketMultiplex(sockjs);
 
+//Websocket variables
 var air  = multiplexer.channel('air');
 var accel  = multiplexer.channel('accel');
 var light = multiplexer.channel('health');
+var soundChannel = multiplexer.channel('sound');
 var CO2Channel = multiplexer.channel('CO2');
+var gasesChannel = multiplexer.channel('gases');
 var battery = multiplexer.channel('battery');
 var locationChannel = multiplexer.channel('location');
 var getterChannel = multiplexer.channel('getterChannel');
+
 var gatewayType = "BeagleBone";
 var currentConnectedDevices = [];
 var connectionSelected = null;
@@ -21,13 +27,21 @@ var deviceNameSent = null;
 $('#temperaturebox').hide();
 $('#pressurebox').hide();
 $('#humiditybox').hide();
+$('#UVbox').hide();
+$('#soundbox').hide();
 $('#CO2box').hide();
+$('#SO2box').hide();
+$('#CObox').hide();
+$('#O3box').hide();
+$('#NO2box').hide();
+
+
 //$('#accelGraph').fadeOut(1000);
 //$('#tempGraph').fadeOut(1000);
 document.getElementById('accelGraph').style.visibility = "hidden"
 document.getElementById('tempGraph').style.visibility = "hidden";
 
-function updateTimer() {
+function updateTimer() { //this timer is used to notify the user if the stream of data stops, we then assume that the device has disconnected.
 	if(deviceNameSent) {
 		connectionUpdateTimer = setTimeout(function() {
 			$('#deviceStatus').html(deviceNameSent + " (Disconnected)");
@@ -41,6 +55,7 @@ function sendCommand(channel, gatewayId,gatewayType, commandName, payloadJSONObj
   channel.send(out);
 }
 
+//This OnClickListener comunicates with the gateway to get a list of all connected devices. 
 document.getElementById('getterbox').addEventListener('click' , function() {
   console.log("get click");
   var gatewayUuid = document.getElementById('uuid').value;
@@ -54,6 +69,7 @@ document.getElementById('getterbox').addEventListener('click' , function() {
 
 });
 
+//callback function to the getter channel and handles messages with the list of connected devices or the info of a specific device
 getterChannel.onmessage = function(e) {
   console.log("message recieved " + JSON.stringify(JSON.parse(e.data).d));
   var data = JSON.parse(e.data);
@@ -86,7 +102,13 @@ getterChannel.onmessage = function(e) {
       $('#temperaturebox').hide();
       $('#pressurebox').hide();
       $('#humiditybox').hide();
+			$('#UVbox').hide();
+			$('#soundbox').hide();
       $('#CO2box').hide();
+			$('#SO2box').hide();
+			$('#CObox').hide();
+			$('#O3box').hide();
+			$('#NO2box').hide();
 			$('#accelGraph').hide();
 			$('#tempGraph').hide();
 			document.getElementById('accelGraph').style.visibility = "hidden"
@@ -98,6 +120,7 @@ getterChannel.onmessage = function(e) {
           $('#temperaturebox').fadeIn(2000);
           $('#pressurebox').fadeIn(2000);
           $('#humiditybox').fadeIn(2000);
+					$('#UVbox').fadeIn(2000);
 					document.getElementById('tempGraph').style.visibility = "visible"
 					$('#tempGraph').fadeIn(2000);
 					sensorData.temperature = [];
@@ -108,17 +131,57 @@ getterChannel.onmessage = function(e) {
 						$("#pressurevalue").html(info.lastPressureData + " mbar");
 						sensorData.setReading("humidity", parseFloat(info.lastHumidityData));
 						$("#humidityvalue").html(info.lastHumidityData + "%");
+						sensorData.setReading("UV", parseInt(info.lastUVData));
+						document.getElementById("UVvalue").innerHTML = info.lastUVData;
 					}
         }
+				soundChannel.send(data);
+				if(info.micSensorOn) {
+					$('#soundbox').fadeIn(2000);
+					if(info.lastSoundData) {
+						sensorData.setReading("sound", parseInt(info.lastSoundData));
+  					$("#soundvalue").html(info.lastSoundData + " dB");
+					}
+				}
 				air.send(data);
         if (info.CO2SensorOn) {
           $('#CO2box').fadeIn(2000);
 					if(info.lastCO2Data) {
-						sensorData.setReading("CO2", parseFloat(info.lastCO2Data));
-  					$("CO2value").html(info.lastCO2Data + " ppm");
+						sensorData.setReading("CO2", parseInt(info.lastCO2Data));
+  					$("#CO2value").html(info.lastCO2Data + " ppm");
 					}
         }
 				CO2Channel.send(data);
+				if (info.SO2SensorOn) {
+          $('#SO2box').fadeIn(2000);
+					if(info.lastSO2Data) {
+						sensorData.setReading("SO2", parseFloat(info.lastSO2Data));
+  					$("#SO2value").html(info.lastSO2Data + " ppm");
+					}
+        }
+				if (info.COSensorOn) {
+          $('#CObox').fadeIn(2000);
+					if(info.lastCOData) {
+						sensorData.setReading("CO", parseFloat(info.lastCOData));
+  					$("#COvalue").html(info.lastCOData + " ppm");
+					}
+        }
+				if (info.O3SensorOn) {
+          $('#O3box').fadeIn(2000);
+					if(info.lastO3Data) {
+						sensorData.setReading("O3", parseFloat(info.lastO3Data));
+  					$("#O3value").html(info.lastO3Data + " ppm");
+					}
+        }
+				if (info.NO2SensorOn) {
+          $('#NO2box').fadeIn(2000);
+					if(info.lastNO2Data) {
+						sensorData.setReading("NO2", parseFloat(info.lastNO2Data));
+  					$("NO2value").html(info.lastNO2Data + " ppm");
+					}
+        }
+				gasesChannel.send(data);
+				
         if (info.accelSensorOn) {
 					document.getElementById('accelGraph').style.visibility = "visible"
 					$('#accelGraph').fadeIn(2000);
@@ -155,7 +218,7 @@ getterChannel.onopen = function() {
   console.log("Getter channel open");
 };
 
-function connectOnClick() {
+function connectOnClick() { //this is called when we chick on the conect button after selecting a device out of theconnected device list.
 	console.log("click");
   if(connectionSelected != null) {
     var id = connectionSelected.getAttribute("id");
@@ -168,21 +231,37 @@ function connectOnClick() {
   }
 }
 
+
+//all the .onmessage functioin are trigered when the server relays messages from mqtt through the websocket, they all contain the live data comming from the enviro that is selected.
 CO2Channel.onmessage = function(e) {
   var data = jQuery.parseJSON(e.data);
   sensorData.setReading("CO2", parseFloat(data.d.CO2));
-  $("CO2value").html(data.d.CO2 + " ppm");
+  $("#CO2value").html(data.d.CO2 + " ppm");
+}
+
+gasesChannel.onmessage = function(e) {
+  var data = jQuery.parseJSON(e.data);
+  sensorData.setReading("SO2", parseFloat(data.d.SO2));
+  $("#SO2value").html(data.d.SO2 + " ppm");
+	sensorData.setReading("CO", parseFloat(data.d.CO));
+  $("#COvalue").html(data.d.CO + " ppm");
+	sensorData.setReading("O3", parseFloat(data.d.O3));
+  $("#O3value").html(data.d.O3 + " ppm");
+	sensorData.setReading("NO2", parseFloat(data.d.NO2));
+  $("#CO2value").html(data.d.NO2 + " ppm");
 }
 
 
 air.onmessage = function(e) {
-  var data = jQuery.parseJSON(e.data);
+  var data = JSON.parse(e.data);
   sensorData.setReading("temperature", parseFloat(data.d.temperature));
   $("#temperaturevalue").html(data.d.temperature + " °C");
   sensorData.setReading("pressure", parseFloat(data.d.pressure));
   $("#pressurevalue").html(data.d.pressure + " mbar");
   sensorData.setReading("humidity", parseFloat(data.d.humidity));
   $("#humidityvalue").html(data.d.humidity + "%");
+	sensorData.setReading("UV", data.d.UV);
+	document.getElementById("UVvalue").innerHTML = data.d.UV;
 };
 
 accel.onmessage = function(e) {
@@ -197,6 +276,11 @@ accel.onmessage = function(e) {
 light.onmessage = function (e) {
 	var data = jQuery.parseJSON(e.data);
 	$("#light_indicator").html(data.d.light + " mV");
+}
+
+soundChannel.onmessage = function (e) {
+	var data = jQuery.parseJSON(e.data);
+	$("#soundvalue").html(data.d.soundLevel + " dB");
 }
 
 battery.onmessage = function(e) {
@@ -216,12 +300,19 @@ locationChannel.onmessage = function(e) {
 }
 
 
+//This is a helper object to display the live data.
 function SensorData() {
 	this.accelerometer = [];
 	this.pressure =  0;
 	this.humidity = 0;
+	this.UV = 0;
+	this.soundLevel = 0;
 	this.temperature = [];
 	this.CO2 = 0;
+	this.SO2 = 0;
+	this.CO = 0;
+	this.O3 = 0;
+	this.NO2 = 0;
 }
 
 SensorData.prototype.setReading = function(type, value) {
@@ -246,9 +337,33 @@ SensorData.prototype.setReading = function(type, value) {
 			this[type] = value;
 			updatepressureGaugeValue();
 			break;
+		case "UV":
+			this[type] = value;
+			updateUVGaugeValue();
     case "CO2":
       this[type] = value;
       updateCO2GaugeValue();
+			break;
+		case "sound":
+      this[type] = value;
+      updateSoundGaugeValue();
+			break;
+		case "SO2":
+			this[type] = value;
+			updateSO2GaugeValue();
+			break;
+		case "CO":
+			this[type] = value;
+			updateCOGaugeValue();
+			break;
+		case "O3":
+			this[type] = value;
+			updateO3GaugeValue();
+			break;
+		case "NO2":
+			this[type] = value;
+			updateNO2GaugeValue();
+			break;
 		case "accelerometer":
 			var data = {
 				//time: Math.round((new Date()).getTime() / 1000) * 1000,
@@ -366,8 +481,8 @@ function onMessage(msg) {
 }
 
 function updateTemperatureGaugeValue() {
-	renderTemperatureGaugeColor(sensorData.temperature[sensorData.temperature.length - 1].value);
-    TemperatureGauge.getInstance().set(sensorData.temperature[sensorData.temperature.length - 1].value);
+	//renderTemperatureGaugeColor(sensorData.temperature[sensorData.temperature.length - 1].value);
+  TemperatureGauge.getInstance().set(sensorData.temperature[sensorData.temperature.length - 1].value);
 }
 
 function updateHumidityGaugeValue() {
@@ -378,8 +493,54 @@ function updatepressureGaugeValue() {
 	PressureGauge.getInstance().set(sensorData.pressure);
 }
 
+function updateSoundGaugeValue() {
+	SoundGauge.getInstance().set(sensorData.sound);
+}
+
+function updateUVGaugeValue()
+{
+    UVGauge.getInstance().set(sensorData.UV);
+		var label = document.getElementById('UVlabel');
+		if(sensorData.UV < 3) {
+        label.innerHTML = "LOW";
+        label.style.color = "#8CD600";
+    }
+    else if(sensorData.UV < 6) {
+        label.innerHTML = "MODERATE";
+        label.style.color = "#F9E814";
+    }
+    else if(sensorData.UV < 8) {
+        label.innerHTML = "HIGH";
+        label.style.color = "#F77F00";
+    }
+    else if(sensorData.UV < 11) {
+        label.innerHTML = "VERY HIGH";
+        label.style.color = "#EF2B2D";
+    }
+    else {
+        label.innerHTML = "EXTREME";
+        label.style.color = "#9663C4";
+    }
+}
+
 function updateCO2GaugeValue() {
   CO2Gauge.getInstance().set(sensorData.CO2);
+}
+
+function updateSO2GaugeValue() {
+  SO2Gauge.getInstance().set(sensorData.SO2);
+}
+
+function updateCOGaugeValue() {
+  COGauge.getInstance().set(sensorData.CO);
+}
+
+function updateO3GaugeValue() {
+  O3Gauge.getInstance().set(sensorData.O3);
+}
+
+function updateNO2GaugeValue() {
+  NO2Gauge.getInstance().set(sensorData.NO2);
 }
 
 
@@ -405,6 +566,14 @@ function renderLineChartAccelerometer() {
 	AccelerometerChart.getInstance().data.labels = getDataSet("time", accelerometerData);
 	AccelerometerChart.getInstance().update();
 
+}
+
+function toggleGraph(name) {
+	$('#'+name).slideToggle();
+}
+
+function closeGraph(name) {
+	$('#'+name).fadeOut();
 }
 
 $(document).ready(function(){
